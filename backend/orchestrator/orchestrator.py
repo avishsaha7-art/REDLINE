@@ -11,6 +11,7 @@ class Orchestrator:
     def __init__(self, run_id: str, task_contract: TaskContract, model_provider=None):
         self.state_machine = StateMachine(run_id, task_contract)
         self.task_contract = task_contract
+        self.model_provider = model_provider
         # Initialize agents
         self.architect = ArchitectAgent(tools=["read_file", "list_files", "search_code"], model_provider=model_provider, events=self.state_machine.events)
         self.builder = BuilderAgent(tools=["read_file", "write_file", "run_tests"], model_provider=model_provider, events=self.state_machine.events)
@@ -296,12 +297,13 @@ class Orchestrator:
                 
                 # Build receipt
                 aggregator = EvidenceAggregator(self.task_contract, patch_lineage=self.patch_lineage)
+                provider_name = getattr(self.model_provider, "provider_name", getattr(self.model_provider, "provider", "test"))
                 self.evidence_receipt = aggregator.build_receipt(
                     self.state_machine.run_id,
                     self.patch_candidate if self.patch_candidate else PatchCandidate(patch_id="none", task_id=self.task_contract.task_id, base_commit_or_snapshot="", diff=""),
                     self.verification_result,
                     self.selected_attacks,
-                    {"provider": "test"},
+                    {"provider": provider_name},
                     {"backend": "LocalDevelopmentBackend"}
                 )
                             

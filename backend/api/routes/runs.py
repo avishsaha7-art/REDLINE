@@ -110,7 +110,6 @@ _runs: RunStoreProxy = RunStoreProxy(_repository)
 _artifact_storage: ArtifactStorage = get_artifact_storage()
 _orchestrators: Dict[str, Orchestrator] = {}
 _threads: Dict[str, threading.Thread] = {}
-_default_model_provider = None
 
 def get_repository() -> SQLiteRunRepository:
     return _repository
@@ -127,19 +126,16 @@ def set_artifact_storage(storage: ArtifactStorage):
     global _artifact_storage
     _artifact_storage = storage
 
+from backend.models.registry import (
+    get_model_provider as registry_get_model_provider,
+    set_model_provider as registry_set_model_provider,
+)
+
 def set_model_provider(provider):
-    global _default_model_provider
-    _default_model_provider = provider
+    registry_set_model_provider(provider)
 
 def get_model_provider():
-    global _default_model_provider
-    if _default_model_provider is not None:
-        return _default_model_provider
-    if os.environ.get("NEBIUS_API_KEY"):
-        from backend.models.nebius_provider import NebiusProvider
-        return NebiusProvider()
-    from backend.models.deterministic_provider import DeterministicTestProvider
-    return DeterministicTestProvider()
+    return registry_get_model_provider()
 
 def reset_run_store():
     _runs.clear()

@@ -67,7 +67,8 @@ class RepairerAgent:
         ]
 
         if self.events:
-            self.events.record_event("MODEL_CALL_STARTED", {"agent": "RepairerAgent", "provider": "nebius"})
+            provider_name = getattr(self.model_provider, "provider_name", getattr(self.model_provider, "provider", "unknown"))
+            self.events.record_event("MODEL_CALL_STARTED", {"agent": "RepairerAgent", "provider": provider_name})
 
         try:
             response = self.model_provider.generate(messages, temperature=0.0)

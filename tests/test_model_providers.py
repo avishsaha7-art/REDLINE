@@ -598,3 +598,86 @@ def test_nebius_scheme_policy_enforcement():
         provider_http.generate([{"role": "user", "content": "hi"}])
     assert exc_info.value.error_type == ModelErrorType.MODEL_CONFIGURATION_ERROR
     assert "Invalid base URL scheme" in str(exc_info.value)
+
+
+# =====================================================================
+# Step 2.6 Integration Tests: Concurrency, Precedence, and Invariants
+# =====================================================================
+
+def test_registry_thread_safety():
+    import threading
+    errors = []
+
+    def worker(idx):
+        try:
+            p = DeterministicTestProvider(predefined_response=f"worker-{idx}")
+            set_model_provider(p)
+            retrieved = get_model_provider()
+            assert retrieved is not None
+        except Exception as e:
+            errors.append(e)
+
+    threads = [threading.Thread(target=worker, args=(i,)) for i in range(20)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    reset_model_provider()
+    assert len(errors) == 0
+
+
+def test_registry_explicit_name_overrides_injected():
+    injected = DeterministicTestProvider(predefined_response="injected")
+    set_model_provider(injected)
+    try:
+        # Default get_model_provider() returns injected
+        assert get_model_provider() is injected
+        # Explicit name returns requested provider despite injected override
+        explicit = get_model_provider("deterministic")
+        assert isinstance(explicit, DeterministicTestProvider)
+        assert explicit is not injected
+    finally:
+        reset_model_provider()
+
+
+def test_registry_whitespace_and_case_insensitivity(monkeypatch):
+    monkeypatch.setenv("REDLINE_MODEL_PROVIDER", "  Nebius  ")
+    monkeypatch.setenv("NEBIUS_API_KEY", "key-123")
+    reset_model_provider()
+    p = get_model_provider()
+    assert isinstance(p, NebiusProvider)
+
+    monkeypatch.setenv("REDLINE_MODEL_PROVIDER", " FreeLLMAPI ")
+    monkeypatch.setenv("FREELLMAPI_API_KEY", "key-456")
+    p2 = get_model_provider()
+    assert isinstance(p2, FreeLLMAPIProvider)
+
+    # Whitespace-only falls back to unset auto-detection
+    monkeypatch.setenv("REDLINE_MODEL_PROVIDER", "   ")
+    monkeypatch.delenv("NEBIUS_API_KEY", raising=False)
+    monkeypatch.delenv("FREELLMAPI_API_KEY", raising=False)
+    p3 = get_model_provider()
+    assert isinstance(p3, DeterministicTestProvider)
+
+
+def test_provider_failure_does_not_bypass_state_transitions():
+    from backend.models.schemas import TaskContract, RunState, OperationalResult
+    from backend.orchestrator.orchestrator import Orchestrator
+
+    class FailingProvider(DeterministicTestProvider):
+        def generate(self, messages, **kwargs):
+            raise ModelProviderError(ModelErrorType.MODEL_UNAVAILABLE, "Gateway down")
+
+    contract = TaskContract(
+        task_id="t-fail",
+        repository_id="r1",
+        base_commit_or_snapshot="h1",
+        task_description="fail-test"
+    )
+    orch = Orchestrator(run_id="run-fail", task_contract=contract, model_provider=FailingProvider())
+    final_state = orch.run()
+    # Invariant: A provider failure MUST abort the run and NEVER result in VERIFIED state
+    assert final_state == RunState.ABORTED
+    assert orch.state_machine.current_state == RunState.ABORTED
+    assert orch.state_machine.current_state != RunState.VERIFIED
