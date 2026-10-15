@@ -1,0 +1,636 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>REDLINE - Session Detail / Mission Control</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary": "#d0bcff",
+            "inverse-on-surface": "#313032",
+            "surface-tint": "#ffb3ad",
+            "on-secondary": "#003824",
+            "on-primary-fixed-variant": "#930013",
+            "tertiary-fixed-dim": "#d0bcff",
+            "surface-dim": "#131315",
+            "on-tertiary-fixed-variant": "#5516be",
+            "surface-container": "#201f22",
+            "secondary-fixed-dim": "#4edea3",
+            "primary": "#ffb3ad",
+            "on-tertiary": "#3c0091",
+            "on-secondary-fixed": "#002113",
+            "tertiary-fixed": "#e9ddff",
+            "secondary-fixed": "#6ffbbe",
+            "background": "#131315",
+            "primary-container": "#ff5451",
+            "on-error": "#690005",
+            "on-primary": "#68000a",
+            "surface": "#131315",
+            "on-tertiary-fixed": "#23005c",
+            "on-error-container": "#ffdad6",
+            "surface-container-lowest": "#0e0e10",
+            "surface-container-highest": "#353437",
+            "on-surface": "#e5e1e4",
+            "error-container": "#93000a",
+            "secondary-container": "#00a572",
+            "on-primary-container": "#5c0008",
+            "on-secondary-container": "#00311f",
+            "outline-variant": "#5b403e",
+            "on-surface-variant": "#e4beba",
+            "inverse-primary": "#b91a24",
+            "error": "#ffb4ab",
+            "outline": "#ab8986",
+            "primary-fixed-dim": "#ffb3ad",
+            "primary-fixed": "#ffdad7",
+            "secondary": "#4edea3",
+            "on-primary-fixed": "#410004",
+            "surface-container-low": "#1c1b1d",
+            "surface-container-high": "#2a2a2c",
+            "on-tertiary-container": "#340080",
+            "surface-bright": "#39393b",
+            "surface-variant": "#353437",
+            "inverse-surface": "#e5e1e4",
+            "on-background": "#e5e1e4",
+            "tertiary-container": "#a078ff",
+            "on-secondary-fixed-variant": "#005236"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "space-lg": "1rem",
+            "gutter-compact": "0.5rem",
+            "space-xs": "0.25rem",
+            "space-xl": "1.5rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "margin-mobile": "1rem",
+            "space-2xl": "2rem",
+            "space-md": "0.75rem"
+          },
+          "fontFamily": {
+            "headline-xl-mobile": ["Geist"],
+            "label-sm": ["JetBrains Mono"],
+            "headline-md": ["Geist"],
+            "body-sm": ["Geist"],
+            "headline-xl": ["Geist"],
+            "code-lg": ["JetBrains Mono"],
+            "headline-lg": ["Geist"],
+            "body-lg": ["Geist"],
+            "code-md": ["JetBrains Mono"],
+            "body-md": ["Geist"],
+            "code-sm": ["JetBrains Mono"],
+            "label-md": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "headline-xl-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "500" }],
+            "headline-md": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "code-lg": ["13px", { "lineHeight": "20px", "fontWeight": "500" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "code-md": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-md": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "code-sm": ["11px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #0e0e10;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #2a2a2c;
+      border-radius: 2px;
+    }
+    .pulse-glow {
+      box-shadow: 0 0 14px 1px rgba(255, 84, 81, 0.45);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-hidden font-body-md text-body-md select-none">
+<div class="flex h-screen w-screen overflow-hidden">
+<!-- SHARED COMPONENT: SideNavBar (Strict implementation from JSON) -->
+<aside class="h-screen w-60 flex flex-col justify-between shrink-0 border-r border-outline-variant bg-surface-container-lowest p-4 gap-6">
+<div class="flex flex-col gap-6">
+<!-- Brand Header -->
+<div class="flex items-center gap-3 px-1">
+<div class="w-8 h-8 rounded bg-primary-container/20 border border-primary-container flex items-center justify-center shrink-0">
+<svg class="w-5 h-5 text-primary-container" fill="currentColor" viewBox="0 0 24 24">
+<path d="M4 4h4.5l5 7-5 7H4l5-7L4 4z"></path>
+<path d="M12 4h4.5l5 7-5 7H12l5-7L12 4z" opacity="0.6"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-lg text-headline-lg tracking-tight font-black text-on-surface uppercase leading-none">REDLINE</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant/60 tracking-wider">Autonomous Security Eng</span>
+</div>
+</div>
+<!-- Action CTA -->
+<button class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded bg-primary-container hover:bg-primary-container/90 text-on-primary-container font-headline-md text-[13px] font-bold tracking-wide transition-all active:scale-[0.98] shadow-sm">
+<span>+ New Task</span>
+</button>
+<!-- Main Navigation Links -->
+<!-- Tab labels from JSON: ["Home", "Projects", "Repositories", "Agents", "Sessions", "Playground", "Evidence", "Models", "Settings"] -->
+<!-- Active Target: "Sessions" matching Session Detail / Mission Control -->
+<nav class="flex flex-col gap-1">
+<!-- Home -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">home</span>
+<span>Home</span>
+</a>
+<!-- Projects -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">folder_open</span>
+<span>Projects</span>
+</a>
+<!-- Repositories -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">source</span>
+<span>Repositories</span>
+</a>
+<!-- Agents -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+<span>Agents</span>
+</a>
+<!-- Sessions: ACTIVE KEY (Applying style_active_navigation) -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-container-high text-primary border-l-2 border-primary font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span>Sessions</span>
+</a>
+<!-- Playground -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">code_blocks</span>
+<span>Playground</span>
+</a>
+<!-- Evidence -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span>Evidence</span>
+</a>
+<!-- Models -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">neurology</span>
+<span>Models</span>
+</a>
+<!-- Settings -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Footer Workspace Profile -->
+<div class="border-t border-outline-variant/60 pt-3 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-full bg-surface-container-highest border border-outline flex items-center justify-center text-primary font-headline-md text-xs font-bold">
+            R
+          </div>
+<div class="flex flex-col">
+<span class="font-headline-md text-[12px] font-semibold text-on-surface leading-tight">Redline</span>
+<span class="font-label-sm text-[9px] text-on-surface-variant/70 tracking-wide">Personal Workspace</span>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors p-1">
+<span class="material-symbols-outlined text-[16px]">account_circle</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas (Includes Mission Control TopNavBar and Workspace) -->
+<div class="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
+<!-- SHARED COMPONENT: TopNavBar (Exact JSON configuration) -->
+<header class="flex justify-between items-center w-full px-6 h-14 bg-surface-container-lowest border-b border-outline-variant shrink-0 z-10">
+<!-- Left: Product Anchor & Mission Links -->
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<span class="font-headline-lg text-headline-lg font-black tracking-tight text-on-surface">REDLINE</span>
+<span class="text-outline-variant font-label-sm px-1.5">/</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Mission Control</span>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm uppercase tracking-wider transition-colors" href="#">Build</a>
+<a class="text-secondary font-label-sm text-label-sm uppercase tracking-wider transition-colors border-b border-secondary pb-0.5" href="#">Attack</a>
+<a class="text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm uppercase tracking-wider transition-colors" href="#">Repair</a>
+<a class="text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm uppercase tracking-wider transition-colors" href="#">Verify</a>
+</nav>
+</div>
+<!-- Trailing Telemetry & Integrations -->
+<div class="flex items-center gap-4">
+<!-- Primary Action Pill: Nebius Token Factory -->
+<div class="flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-secondary uppercase font-semibold">Nebius Token Factory</span>
+<span class="font-code-sm text-[10px] text-on-surface-variant/80 font-normal">Active</span>
+</div>
+<!-- Secondary Action Pill: NVIDIA Nemotron -->
+<div class="flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-label-sm text-label-sm text-tertiary uppercase font-semibold">NVIDIA Nemotron</span>
+<span class="font-code-sm text-[10px] text-on-surface-variant/80 font-normal">70B</span>
+</div>
+<div class="h-4 w-px bg-outline-variant"></div>
+<!-- Trailing Icon Actions -->
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Notifications">
+<span class="material-symbols-outlined text-[18px]">notifications</span>
+</button>
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Split Screen">
+<span class="material-symbols-outlined text-[18px]">splitscreen</span>
+</button>
+</div>
+<!-- Profile Thumbnail -->
+<div class="w-7 h-7 rounded border border-outline-variant bg-surface-container-high flex items-center justify-center font-headline-md text-xs font-bold text-on-surface">
+            RL
+          </div>
+</div>
+</header>
+<!-- Mission Control Session Container -->
+<main class="flex-1 flex flex-col p-5 gap-4 overflow-y-auto custom-scroll">
+<!-- Screen Subheader: Title, Task ID, Live Badge, Actions -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-outline-variant/50">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3">
+<span class="font-label-sm text-label-sm text-primary font-semibold tracking-wider">04. SESSION DETAIL / MISSION CONTROL</span>
+</div>
+<div class="flex items-center gap-3 flex-wrap">
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Fix duplicate payment processing</h1>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-label-sm font-semibold bg-primary-container/20 border border-primary-container/50 text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+                In Progress
+              </span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant font-code-sm text-code-sm">
+<span class="flex items-center gap-1">
+<span class="text-outline">Run ID:</span>
+<span class="text-on-surface font-medium">run_20261005_101423</span>
+</span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1">
+<span class="text-outline">Start time:</span>
+<span class="text-on-surface">Oct 5, 2026 10:14:23</span>
+</span>
+</div>
+</div>
+<!-- Header Trailing Action Buttons -->
+<div class="flex items-center gap-2 self-start md:self-auto">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface font-label-md text-label-md transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]">share</span>
+<span>Share</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface font-label-md text-label-md transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]">pause_circle</span>
+<span>Pause</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-error-container hover:bg-error-container/80 border border-primary-container text-on-primary-container font-label-md text-label-md transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]">stop_circle</span>
+<span>Abort</span>
+</button>
+</div>
+</div>
+<!-- Pipeline Progress Stepper (Card 04 in image) -->
+<div class="w-full bg-surface-container-lowest border border-outline-variant rounded p-4">
+<div class="relative flex items-center justify-between">
+<!-- Continuous Hairline Connector Line -->
+<div class="absolute left-6 right-6 top-4 h-[2px] bg-surface-container-highest z-0"></div>
+<!-- Stage 1 to 3 completed line -->
+<div class="absolute left-6 w-[33%] top-4 h-[2px] bg-gradient-to-r from-secondary via-secondary to-primary-container z-0"></div>
+<!-- Stage 1: Recon (Verified) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest border-2 border-secondary flex items-center justify-center text-secondary mb-2 shadow-sm">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-headline-md text-xs font-semibold text-on-surface">1. Recon</span>
+<span class="font-code-sm text-[10px] text-secondary font-medium">Verified</span>
+</div>
+<!-- Stage 2: Plan (Verified) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest border-2 border-secondary flex items-center justify-center text-secondary mb-2 shadow-sm">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-headline-md text-xs font-semibold text-on-surface">2. Plan</span>
+<span class="font-code-sm text-[10px] text-secondary font-medium">Verified</span>
+</div>
+<!-- Stage 3: Build (Active / In Progress - Crimson Glowing) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-primary-container border-2 border-primary flex items-center justify-center text-on-primary-container mb-2 pulse-glow animate-pulse">
+<span class="material-symbols-outlined text-[16px]">sync</span>
+</div>
+<span class="font-headline-md text-xs font-bold text-primary">3. Build</span>
+<span class="font-code-sm text-[10px] text-primary-container font-semibold">In Progress</span>
+</div>
+<!-- Stage 4: Test (Pending) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-outline mb-2">
+<span class="font-label-sm text-xs">4</span>
+</div>
+<span class="font-headline-md text-xs font-medium text-on-surface-variant">4. Test</span>
+<span class="font-code-sm text-[10px] text-outline">Pending</span>
+</div>
+<!-- Stage 5: Attack (Pending) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-outline mb-2">
+<span class="font-label-sm text-xs">5</span>
+</div>
+<span class="font-headline-md text-xs font-medium text-on-surface-variant">5. Attack</span>
+<span class="font-code-sm text-[10px] text-outline">Pending</span>
+</div>
+<!-- Stage 6: Repair (Pending) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-outline mb-2">
+<span class="font-label-sm text-xs">6</span>
+</div>
+<span class="font-headline-md text-xs font-medium text-on-surface-variant">6. Repair</span>
+<span class="font-code-sm text-[10px] text-outline">Pending</span>
+</div>
+<!-- Stage 7: Verify (Pending) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-outline mb-2">
+<span class="font-label-sm text-xs">7</span>
+</div>
+<span class="font-headline-md text-xs font-medium text-on-surface-variant">7. Verify</span>
+<span class="font-code-sm text-[10px] text-outline">Pending</span>
+</div>
+</div>
+</div>
+<!-- 3-Column Mission Control Grid (Log / Active Agent Code / Telemetry) -->
+<div class="flex-1 grid grid-cols-12 gap-4 min-h-0">
+<!-- LEFT PANEL: Execution Log (Col 3) -->
+<div class="col-span-12 lg:col-span-3 bg-surface-container-lowest border border-outline-variant rounded flex flex-col overflow-hidden">
+<div class="px-3.5 py-2.5 border-b border-outline-variant flex items-center justify-between bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">terminal</span>
+<span class="font-headline-md text-xs font-semibold text-on-surface uppercase tracking-wide">Execution Log</span>
+</div>
+<a class="font-label-sm text-[10px] text-primary hover:underline flex items-center gap-1" href="#">
+                View Full Logs
+                <span class="material-symbols-outlined text-[12px]">open_in_new</span>
+</a>
+</div>
+<!-- Scrollable Real-time Monospace Telemetry Stream -->
+<div class="p-3 font-code-sm text-[11px] leading-relaxed flex flex-col gap-2.5 overflow-y-auto custom-scroll flex-1">
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0 font-label-sm">10:14:23</span>
+<span class="text-secondary shrink-0">●</span>
+<span class="text-on-surface">Recon agent: analyzing repository structure and dependency tree...</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0 font-label-sm">10:14:35</span>
+<span class="text-secondary shrink-0">●</span>
+<span class="text-on-surface-variant">Found FastAPI project (<span class="text-tertiary">Python 3.11</span>, SQLAlchemy, Celery)</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0 font-label-sm">10:14:41</span>
+<span class="text-secondary shrink-0">●</span>
+<span class="text-on-surface">Identifying relevant files: <code class="text-primary bg-surface-container-high px-1 rounded">app/payment.py</code>, <code class="text-on-surface-variant bg-surface-container-high px-1 rounded">app/tasks.py</code></span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0 font-label-sm">10:14:49</span>
+<span class="text-secondary shrink-0">●</span>
+<span class="text-on-surface">Plan agent: creating implementation plan for idempotency lock &amp; transactions</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0 font-label-sm">10:14:50</span>
+<span class="text-primary-container shrink-0 animate-pulse">●</span>
+<span class="text-on-surface font-medium">Builder agent: generating patch for race condition prevention...</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0 font-label-sm">10:15:02</span>
+<span class="text-primary-container shrink-0">●</span>
+<span class="text-primary font-medium">Writing changes to <code class="bg-surface-container px-1 rounded border border-outline-variant">app/payment.py</code></span>
+</div>
+<div class="flex items-start gap-2 bg-surface-container-low/60 p-1.5 rounded border border-outline-variant/30">
+<span class="text-outline shrink-0 font-label-sm">10:15:06</span>
+<span class="text-tertiary shrink-0">▶</span>
+<span class="text-tertiary font-medium">Running initial tests via pytest runner daemon...</span>
+</div>
+</div>
+<!-- Bottom Console Prompt Input -->
+<div class="p-2 border-t border-outline-variant/50 bg-surface-container-low flex items-center gap-2">
+<span class="text-primary font-label-sm text-xs font-bold">&gt;</span>
+<input class="w-full bg-transparent border-none text-on-surface font-code-sm text-xs placeholder:text-outline/50 focus:ring-0 p-0" placeholder="Inject command or hint..." type="text">
+<span class="material-symbols-outlined text-outline text-[16px]">keyboard_return</span>
+</div>
+</div>
+<!-- MIDDLE PANEL: Current Agent & Interactive Code Diff Preview (Col 6) -->
+<div class="col-span-12 lg:col-span-6 flex flex-col gap-3 min-h-0">
+<!-- Builder Agent Status Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-3.5 flex flex-col gap-2.5 relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded bg-primary-container/20 border border-primary-container flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">smart_toy</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-sm font-bold text-on-surface">Builder Agent</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-label-sm bg-primary-container/20 text-primary border border-primary-container/40">Active</span>
+</div>
+<span class="font-body-sm text-xs text-on-surface-variant">Generating code changes based on the implementation plan...</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-code-lg text-sm font-bold text-primary">68%</span>
+</div>
+</div>
+<!-- Segmented Dual Progress Track -->
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full transition-all duration-300" style="width: 68%;"></div>
+</div>
+<!-- Model / Engine Sub-bar -->
+<div class="flex items-center justify-between pt-1 text-[11px] font-code-sm text-on-surface-variant/80 border-t border-outline-variant/30">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-tertiary text-[14px]">neurology</span>
+<span>Engine: <span class="text-on-surface font-semibold">NVIDIA Nemotron 70B</span></span>
+</div>
+<span class="text-secondary font-label-sm">Tokens/sec: 84.2</span>
+</div>
+</div>
+<!-- Code Diff & Editor Preview Window -->
+<div class="flex-1 bg-surface-container-lowest border border-outline-variant rounded flex flex-col overflow-hidden min-h-[300px]">
+<!-- Editor Titlebar -->
+<div class="px-3.5 py-2 border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">code</span>
+<span class="font-code-md text-xs font-semibold text-on-surface">app/payment.py</span>
+<span class="px-1.5 py-0.2 rounded text-[10px] font-label-sm bg-surface-container-high text-outline">Python</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label-sm text-[10px] text-secondary">+14 lines</span>
+<span class="font-label-sm text-[10px] text-primary-container">-5 lines</span>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors" title="Copy patch">
+<span class="material-symbols-outlined text-[15px]">content_copy</span>
+</button>
+</div>
+</div>
+<!-- Monospace Code Diff Content -->
+<div class="p-3 font-code-md text-xs leading-relaxed overflow-y-auto custom-scroll flex-1 bg-surface-container-lowest">
+<pre class="font-code-sm text-[11.5px] leading-5"><code><span class="text-outline select-none pr-4">31</span><span class="text-tertiary">async def</span> <span class="text-secondary">process_payment</span>(self, user_id: <span class="text-tertiary">str</span>, amount: <span class="text-tertiary">float</span>, idempotency_key: <span class="text-tertiary">str</span>):
+<span class="text-outline select-none pr-4">32</span>    <span class="text-outline/70"># Validate account state and idempotency records</span>
+<span class="bg-error-container/20 text-error border-l-2 border-primary-container block -mx-3 px-3"><span class="text-primary-container font-bold select-none pr-3">-</span><span class="text-outline select-none pr-4">33</span>    existing = await self.db.fetch("SELECT * FROM payments WHERE id = $1", user_id)</span>
+<span class="bg-error-container/20 text-error border-l-2 border-primary-container block -mx-3 px-3"><span class="text-primary-container font-bold select-none pr-3">-</span><span class="text-outline select-none pr-4">34</span>    if existing: return {"status": "already_processed"}</span>
+<span class="bg-secondary-container/20 text-secondary border-l-2 border-secondary block -mx-3 px-3"><span class="text-secondary font-bold select-none pr-3">+</span><span class="text-outline select-none pr-4">33</span>    <span class="text-tertiary">async with</span> self.db.transaction():</span>
+<span class="bg-secondary-container/20 text-secondary border-l-2 border-secondary block -mx-3 px-3"><span class="text-secondary font-bold select-none pr-3">+</span><span class="text-outline select-none pr-4">34</span>        <span class="text-outline/70"># Redis distributed lock prevents concurrent double debit</span></span>
+<span class="bg-secondary-container/20 text-secondary border-l-2 border-secondary block -mx-3 px-3"><span class="text-secondary font-bold select-none pr-3">+</span><span class="text-outline select-none pr-4">35</span>        <span class="text-tertiary">async with</span> self.redis.lock(f"pay_lock:{idempotency_key}", timeout=10):</span>
+<span class="bg-secondary-container/20 text-secondary border-l-2 border-secondary block -mx-3 px-3"><span class="text-secondary font-bold select-none pr-3">+</span><span class="text-outline select-none pr-4">36</span>            existing = await self.db.fetch_one(</span>
+<span class="bg-secondary-container/20 text-secondary border-l-2 border-secondary block -mx-3 px-3"><span class="text-secondary font-bold select-none pr-3">+</span><span class="text-outline select-none pr-4">37</span>                "SELECT id, status FROM payments WHERE idem_key = $1 FOR UPDATE", idempotency_key</span>
+<span class="bg-secondary-container/20 text-secondary border-l-2 border-secondary block -mx-3 px-3"><span class="text-secondary font-bold select-none pr-3">+</span><span class="text-outline select-none pr-4">38</span>            )</span>
+<span class="bg-secondary-container/20 text-secondary border-l-2 border-secondary block -mx-3 px-3"><span class="text-secondary font-bold select-none pr-3">+</span><span class="text-outline select-none pr-4">39</span>            <span class="text-tertiary">if</span> existing:</span>
+<span class="bg-secondary-container/20 text-secondary border-l-2 border-secondary block -mx-3 px-3"><span class="text-secondary font-bold select-none pr-3">+</span><span class="text-outline select-none pr-4">40</span>                return PaymentResult(success=True, duplicate=True, payload=existing)</span>
+<span class="text-outline select-none pr-4">41</span>            
+<span class="text-outline select-none pr-4">42</span>            record = await self.gateway.charge(amount=amount, token=user_id)
+<span class="text-outline select-none pr-4">43</span>            await self.db.execute("INSERT INTO payments VALUES ($1, $2, $3)", user_id, amount, idempotency_key)
+<span class="text-outline select-none pr-4">44</span>            return PaymentResult(success=True, duplicate=False, payload=record)</code></pre>
+</div>
+</div>
+</div>
+<!-- RIGHT PANEL: Run Information & Hardware Telemetry (Col 3) -->
+<div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
+<!-- Card: Run Information -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-3.5 flex flex-col gap-3">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-headline-md text-xs font-semibold text-on-surface uppercase tracking-wide">Run Information</span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="flex flex-col gap-2 font-code-sm text-xs">
+<div class="flex justify-between items-center py-0.5">
+<span class="text-outline">Status</span>
+<span class="text-primary font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                    In Progress
+                  </span>
+</div>
+<div class="flex justify-between items-center py-0.5">
+<span class="text-outline">Repository</span>
+<a class="text-on-surface hover:text-primary transition-colors font-medium flex items-center gap-1" href="#">
+                    payment-api
+                    <span class="material-symbols-outlined text-[13px]">open_in_new</span>
+</a>
+</div>
+<div class="flex justify-between items-center py-0.5">
+<span class="text-outline">Branch</span>
+<span class="text-on-surface font-semibold bg-surface-container-high px-1.5 py-0.5 rounded text-[11px]">main</span>
+</div>
+<div class="flex justify-between items-center py-0.5">
+<span class="text-outline">Language</span>
+<span class="text-on-surface">Python 3.11</span>
+</div>
+<div class="flex justify-between items-center py-0.5">
+<span class="text-outline">Framework</span>
+<span class="text-tertiary">PyTest</span>
+</div>
+<div class="flex justify-between items-center py-0.5 border-t border-outline-variant/40 pt-1.5">
+<span class="text-outline">Started</span>
+<span class="text-on-surface-variant font-label-sm text-[10px]">Oct 5, 2026 10:14:23</span>
+</div>
+<div class="flex justify-between items-center py-0.5">
+<span class="text-outline">Duration</span>
+<span class="text-on-surface font-label-sm text-[10px]">00:00:43</span>
+</div>
+</div>
+</div>
+<!-- Card: Resource Usage Telemetry -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-3.5 flex flex-col gap-3.5 flex-1">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-headline-md text-xs font-semibold text-on-surface uppercase tracking-wide">Resource Usage</span>
+<span class="font-label-sm text-[10px] text-outline font-medium">H100 Node #04</span>
+</div>
+<!-- Metric: CPU -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-code-sm">
+<span class="text-outline">CPU</span>
+<span class="text-on-surface font-semibold">22%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 22%;"></div>
+</div>
+</div>
+<!-- Metric: Memory -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-code-sm">
+<span class="text-outline">Memory</span>
+<span class="text-on-surface font-semibold">6.4 / 16 GB</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full rounded-full" style="width: 40%;"></div>
+</div>
+</div>
+<!-- Metric: GPU (VRAM) -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-code-sm">
+<span class="text-outline">GPU (VRAM)</span>
+<span class="text-on-surface font-semibold">18%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 18%;"></div>
+</div>
+</div>
+<!-- Metric: Storage -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-code-sm">
+<span class="text-outline">Storage</span>
+<span class="text-on-surface font-semibold">12 / 100 GB</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-outline h-full rounded-full" style="width: 12%;"></div>
+</div>
+</div>
+<!-- Live Telemetry Sparkline / Activity Indicator -->
+<div class="mt-auto pt-3 border-t border-outline-variant/50 flex flex-col gap-2">
+<div class="flex justify-between items-center text-[11px] font-label-sm">
+<span class="text-outline">Network I/O</span>
+<span class="text-secondary font-medium">1.4 MB/s</span>
+</div>
+<div class="h-6 flex items-end gap-1 bg-surface-container-low px-2 py-1 rounded border border-outline-variant/30">
+<div class="w-1 bg-secondary/40 h-2 rounded-t-sm"></div>
+<div class="w-1 bg-secondary/50 h-3 rounded-t-sm"></div>
+<div class="w-1 bg-secondary/60 h-2.5 rounded-t-sm"></div>
+<div class="w-1 bg-secondary/80 h-4 rounded-t-sm"></div>
+<div class="w-1 bg-secondary h-5 rounded-t-sm animate-pulse"></div>
+<div class="w-1 bg-secondary/70 h-3 rounded-t-sm"></div>
+<div class="w-1 bg-secondary/90 h-4.5 rounded-t-sm"></div>
+<div class="w-1 bg-secondary h-5.5 rounded-t-sm animate-pulse"></div>
+<div class="w-1 bg-secondary/80 h-3.5 rounded-t-sm"></div>
+<div class="w-1 bg-secondary/60 h-2 rounded-t-sm"></div>
+<div class="w-1 bg-secondary h-5 rounded-t-sm"></div>
+<div class="w-1 bg-secondary/90 h-4 rounded-t-sm"></div>
+<div class="w-1 bg-secondary h-6 rounded-t-sm animate-pulse"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

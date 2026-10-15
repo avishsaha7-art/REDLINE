@@ -1,0 +1,758 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>REDLINE // 09. Models</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Geist & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim from Design System -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#5516be",
+            "error-container": "#93000a",
+            "primary-container": "#ff5451",
+            "surface-container-high": "#2a2a2c",
+            "outline-variant": "#5b403e",
+            "tertiary-container": "#a078ff",
+            "surface-container-low": "#1c1b1d",
+            "error": "#ffb4ab",
+            "on-error-container": "#ffdad6",
+            "inverse-primary": "#b91a24",
+            "secondary-fixed": "#6ffbbe",
+            "surface-bright": "#39393b",
+            "inverse-on-surface": "#313032",
+            "on-secondary-fixed-variant": "#005236",
+            "surface-dim": "#131315",
+            "on-tertiary-container": "#340080",
+            "secondary": "#4edea3",
+            "on-primary-fixed-variant": "#930013",
+            "tertiary": "#d0bcff",
+            "on-surface-variant": "#e4beba",
+            "on-primary": "#68000a",
+            "on-error": "#690005",
+            "secondary-container": "#00a572",
+            "background": "#131315",
+            "on-secondary-container": "#00311f",
+            "on-background": "#e5e1e4",
+            "surface-variant": "#353437",
+            "secondary-fixed-dim": "#4edea3",
+            "surface-container": "#201f22",
+            "on-secondary-fixed": "#002113",
+            "outline": "#ab8986",
+            "on-tertiary-fixed": "#23005c",
+            "on-surface": "#e5e1e4",
+            "on-tertiary": "#3c0091",
+            "primary-fixed": "#ffdad7",
+            "surface-container-highest": "#353437",
+            "surface-container-lowest": "#0e0e10",
+            "tertiary-fixed": "#e9ddff",
+            "primary": "#ffb3ad",
+            "surface": "#131315",
+            "on-secondary": "#003824",
+            "inverse-surface": "#e5e1e4",
+            "surface-tint": "#ffb3ad",
+            "on-primary-fixed": "#410004",
+            "primary-fixed-dim": "#ffb3ad",
+            "tertiary-fixed-dim": "#d0bcff",
+            "on-primary-container": "#5c0008"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-lg": "1rem",
+            "space-xs": "0.25rem",
+            "space-xl": "1.5rem",
+            "space-md": "0.75rem",
+            "margin-mobile": "1rem",
+            "space-2xl": "2rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "gutter": "1rem",
+            "gutter-compact": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["JetBrains Mono"],
+            "body-md": ["Geist"],
+            "code-lg": ["JetBrains Mono"],
+            "label-md": ["JetBrains Mono"],
+            "headline-xl-mobile": ["Geist"],
+            "headline-md": ["Geist"],
+            "body-lg": ["Geist"],
+            "headline-xl": ["Geist"],
+            "code-md": ["JetBrains Mono"],
+            "headline-lg": ["Geist"],
+            "body-sm": ["Geist"],
+            "code-sm": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "500" }],
+            "body-md": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "code-lg": ["13px", { "lineHeight": "20px", "fontWeight": "500" }],
+            "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-md": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "code-md": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "code-sm": ["11px", { "lineHeight": "16px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .laser-border {
+      box-shadow: inset 0 1px 0 0 rgba(255, 84, 81, 0.4), 0 0 12px -2px rgba(239, 68, 68, 0.15);
+    }
+    .telemetry-grid {
+      background-image: linear-gradient(to right, rgba(91, 64, 62, 0.1) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(91, 64, 62, 0.1) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased font-body-md text-body-md h-screen flex flex-col overflow-hidden selection:bg-primary selection:text-on-primary">
+<!-- TOP NAVIGATION BAR (Mission Control Header) -->
+<header class="flex justify-between items-center w-full px-6 h-14 bg-surface-container-lowest border-b border-outline-variant shrink-0 z-30">
+<!-- Brand Anchor & Mission Moto -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<svg class="w-6 h-6 text-primary-container fill-current" viewBox="0 0 32 32">
+<path d="M4 6L14 16L4 26H10L20 16L10 6H4ZM14 6L24 16L14 26H20L30 16L20 6H14Z"></path>
+</svg>
+<span class="font-headline-lg text-headline-lg font-black tracking-tight text-on-surface">REDLINE</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant hidden sm:block"></div>
+<span class="font-code-sm text-code-sm text-outline hidden md:inline-block tracking-wide">
+        AI-generated code is guilty until proven safe.
+      </span>
+</div>
+<!-- Mode Links: Build, Attack, Repair, Verify -->
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider hover:text-on-surface transition-colors flex items-center gap-1.5" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>Build
+      </a>
+<a class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider hover:text-on-surface transition-colors flex items-center gap-1.5" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Attack
+      </a>
+<a class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider hover:text-on-surface transition-colors flex items-center gap-1.5" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>Repair
+      </a>
+<a class="text-secondary font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Verify
+      </a>
+</nav>
+<!-- Trailing Actions & Telemetry Integrations -->
+<div class="flex items-center gap-3">
+<!-- Active Provider Pills -->
+<div class="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant/60">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Nebius Token Factory</span>
+</div>
+<div class="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant/60">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface">NVIDIA Nemotron</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant hidden xl:block"></div>
+<!-- Icon Actions -->
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Notifications">
+<span class="material-symbols-outlined text-[18px]">notifications</span>
+</button>
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Split Screen Mode">
+<span class="material-symbols-outlined text-[18px]">splitscreen</span>
+</button>
+<!-- User Profile Avatar -->
+<div class="flex items-center gap-2 pl-2 border-l border-outline-variant">
+<div class="w-7 h-7 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary font-label-sm text-label-sm font-semibold">
+          RL
+        </div>
+</div>
+</div>
+</header>
+<!-- BODY VIEWPORT WRAPPER: SideNavBar + Main Content Canvas -->
+<div class="flex flex-1 overflow-hidden">
+<!-- SIDE NAVIGATION BAR (Exact Match to Predicted Shared Components JSON) -->
+<aside class="w-60 flex flex-col p-4 gap-6 shrink-0 border-r border-outline-variant bg-surface-container-lowest justify-between h-full">
+<div class="flex flex-col gap-5">
+<!-- Sidebar Brand Sub-Header -->
+<div class="flex items-center gap-2.5 px-2">
+<div class="w-2.5 h-2.5 rounded bg-primary-container"></div>
+<div>
+<div class="font-label-md text-label-md font-bold text-on-surface">REDLINE CORE</div>
+<div class="font-label-sm text-label-sm text-outline">Autonomous Security Eng</div>
+</div>
+</div>
+<!-- + New Task Primary Action -->
+<button class="w-full flex items-center justify-center gap-2 py-2 px-3 bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-label-md text-label-md font-semibold rounded shadow-sm active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]">add</span>
+          + New Task
+        </button>
+<!-- Navigation Tabs List (9 Items from JSON) -->
+<nav class="flex flex-col gap-1">
+<!-- Home -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[18px]">home</span>
+<span>Home</span>
+</a>
+<!-- Projects -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[18px]">folder_open</span>
+<span>Projects</span>
+</a>
+<!-- Repositories -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[18px]">source</span>
+<span>Repositories</span>
+</a>
+<!-- Agents -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+<span>Agents</span>
+</a>
+<!-- Sessions -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span>Sessions</span>
+</a>
+<!-- Playground -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[18px]">code_blocks</span>
+<span>Playground</span>
+</a>
+<!-- Evidence -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span>Evidence</span>
+</a>
+<!-- Models (ACTIVE DESTINATION: Mapping to style_active_navigation) -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-container-high text-primary border-l-2 border-primary font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[18px]">neurology</span>
+<span>Models</span>
+</a>
+<!-- Settings -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Footer Workspace Action -->
+<div class="pt-3 border-t border-outline-variant">
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[18px]">account_circle</span>
+<div class="truncate">
+<span class="block text-on-surface font-medium truncate">Personal Workspace</span>
+<span class="text-[9px] text-outline font-label-sm">Free Tier • 16.4k tok</span>
+</div>
+</a>
+</div>
+</aside>
+<!-- MAIN CONTENT CANVAS -->
+<main class="flex-1 overflow-y-auto telemetry-grid p-6 space-y-6">
+<!-- Screen Breadcrumb & Header Title -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-outline-variant">
+<div>
+<div class="flex items-center gap-2 font-code-sm text-code-sm text-outline mb-1">
+<span>CORE</span>
+<span>/</span>
+<span class="text-primary font-medium">09. MODELS</span>
+<span>/</span>
+<span class="text-on-surface-variant">INFRASTRUCTURE</span>
+</div>
+<div class="flex items-center gap-3">
+<h1 class="font-headline-lg text-headline-lg font-bold tracking-tight text-on-surface">09. Models</h1>
+<span class="px-2 py-0.5 rounded text-[10px] font-label-sm bg-secondary/10 text-secondary border border-secondary/20 font-semibold tracking-wide uppercase">
+              Operational
+            </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+            Model providers, token factory routing, and latency configuration.
+          </p>
+</div>
+<!-- Telemetry Controls & Routing Mode -->
+<div class="flex items-center gap-3">
+<div class="flex items-center bg-surface-container-low border border-outline-variant p-1 rounded font-label-sm text-label-sm">
+<button class="px-3 py-1 rounded bg-surface-container text-on-surface font-medium">Automatic Failover</button>
+<button class="px-3 py-1 rounded text-outline hover:text-on-surface transition-colors">Strict Policy</button>
+</div>
+<button class="flex items-center gap-1.5 px-3 py-2 rounded bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface font-label-md text-label-md transition-colors">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+            Global Inference Rules
+          </button>
+</div>
+</div>
+<!-- THREE PROVIDER CARDS (Card 09 in Reference Layout) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+<!-- 1. NVIDIA Nemotron Card -->
+<div class="flex flex-col justify-between p-5 bg-surface-container-low border border-outline-variant rounded relative group hover:border-outline transition-all laser-border">
+<div class="space-y-4">
+<!-- Header & Badges -->
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-[#10b981]/10 border border-secondary/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">neurology</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface leading-snug">NVIDIA Nemotron</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface border border-outline-variant">
+                      70B (Instruct)
+                    </span>
+<span class="flex items-center gap-1 text-[10px] font-label-sm text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span> Active
+                    </span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline hover:text-on-surface cursor-pointer text-[18px]">more_vert</span>
+</div>
+<!-- Description -->
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              High-quality code generation and reasoning for complex patch orchestration and zero-day defense pipelines.
+            </p>
+<!-- Metrics Telemetry Box -->
+<div class="grid grid-cols-3 gap-2 p-3 bg-surface-container-lowest border border-outline-variant/60 rounded">
+<div>
+<span class="font-label-sm text-label-sm text-outline block">Latency</span>
+<span class="font-code-md text-code-md font-semibold text-secondary">~1.2s <span class="text-[9px] text-outline font-normal">(p50)</span></span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-outline block">Context</span>
+<span class="font-code-md text-code-md font-semibold text-on-surface">128K</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-outline block">Throughput</span>
+<span class="font-code-md text-code-md font-semibold text-on-surface">84.2 t/s</span>
+</div>
+</div>
+<!-- Segmented Gauge Telemetry -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-outline">Active VRAM Cache</span>
+<span class="font-code-sm text-code-sm text-on-surface">78% Allocated</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-lowest rounded-full overflow-hidden flex">
+<div class="bg-secondary h-full" style="width: 78%"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Configure Button -->
+<div class="pt-5 mt-4 border-t border-outline-variant/60 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">Provider: NVIDIA Cloud API</span>
+<button class="px-4 py-1.5 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface border border-outline font-label-md text-label-md transition-colors active:scale-[0.98]">
+              Configure
+            </button>
+</div>
+</div>
+<!-- 2. Nebius Token Factory Card -->
+<div class="flex flex-col justify-between p-5 bg-surface-container-low border border-outline-variant rounded relative group hover:border-outline transition-all">
+<div class="space-y-4">
+<!-- Header & Badges -->
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-tertiary-container/10 border border-tertiary/30 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[22px]">memory</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface leading-snug">Nebius Token Factory</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface border border-outline-variant">
+                      Serverless Runtime
+                    </span>
+<span class="flex items-center gap-1 text-[10px] font-label-sm text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Connected
+                    </span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline hover:text-on-surface cursor-pointer text-[18px]">more_vert</span>
+</div>
+<!-- Description -->
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Isolated code execution, hot sandboxed containers, and fast-start inference environment for red-team execution.
+            </p>
+<!-- Metrics Telemetry Box -->
+<div class="grid grid-cols-3 gap-2 p-3 bg-surface-container-lowest border border-outline-variant/60 rounded">
+<div>
+<span class="font-label-sm text-label-sm text-outline block">Region</span>
+<span class="font-code-md text-code-md font-semibold text-on-surface">Global Edge</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-outline block">GPU Cluster</span>
+<span class="font-code-md text-code-md font-semibold text-on-surface">H100 SXM5</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-outline block">Inference TTFT</span>
+<span class="font-code-md text-code-md font-semibold text-secondary">18ms</span>
+</div>
+</div>
+<!-- Segmented Gauge Telemetry -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-outline">Compute Concurrency</span>
+<span class="font-code-sm text-code-sm text-on-surface">14 / 64 Nodes</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-lowest rounded-full overflow-hidden flex">
+<div class="bg-tertiary-container h-full" style="width: 22%"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Configure Button -->
+<div class="pt-5 mt-4 border-t border-outline-variant/60 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">Provider: Nebius AI Studio</span>
+<button class="px-4 py-1.5 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface border border-outline font-label-md text-label-md transition-colors active:scale-[0.98]">
+              Configure
+            </button>
+</div>
+</div>
+<!-- 3. Other Models Card -->
+<div class="flex flex-col justify-between p-5 bg-surface-container-low border border-outline-variant rounded relative group hover:border-outline transition-all">
+<div class="space-y-4">
+<!-- Header & Badges -->
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container/10 border border-primary-container/30 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[22px]">hub</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface leading-snug">Other Models</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-high text-outline border border-outline-variant">
+                      3 Active Hubs
+                    </span>
+<span class="text-[10px] font-label-sm text-outline bg-surface-container px-1.5 py-0.5 rounded">
+                      Fallback Ready
+                    </span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline hover:text-on-surface cursor-pointer text-[18px]">more_vert</span>
+</div>
+<!-- Description -->
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Integrate additional models and secondary engines for specialized agentic workflows and automated fuzzing.
+            </p>
+<!-- Providers Mini List -->
+<div class="space-y-2">
+<div class="flex items-center justify-between p-2 rounded bg-surface-container-lowest border border-outline-variant/50">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">DeepSeek</span>
+<span class="font-label-sm text-label-sm text-outline">V3 MoE</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Primary Fuzzer</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-surface-container-lowest border border-outline-variant/50">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">Llama</span>
+<span class="font-label-sm text-label-sm text-outline">3.3 70B</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Code Verification</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-surface-container-lowest border border-outline-variant/50">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">Custom</span>
+<span class="font-label-sm text-label-sm text-outline">OpenAI / Claude</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline">Manual Review</span>
+</div>
+</div>
+</div>
+<!-- Bottom Add/Configure Button -->
+<div class="pt-5 mt-4 border-t border-outline-variant/60 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">Router: Multi-Protocol</span>
+<button class="px-4 py-1.5 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface border border-outline font-label-md text-label-md transition-colors active:scale-[0.98]">
+              Configure / Add Provider
+            </button>
+</div>
+</div>
+</div>
+<!-- MIDDLE TELEMETRY SECTION: Real-time Throughput Graph & Live Load Distribution -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+<!-- Throughput Graph Container (2 Cols) -->
+<div class="lg:col-span-2 p-5 bg-surface-container-low border border-outline-variant rounded flex flex-col justify-between">
+<div class="flex items-center justify-between mb-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Token Throughput Telemetry</span>
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-high text-on-surface">Live 60s window</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Real-time generated tokens/sec across all connected agents.</p>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1.5 font-label-sm text-label-sm text-secondary">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> Nemotron (Active)
+              </span>
+<span class="flex items-center gap-1.5 font-label-sm text-label-sm text-tertiary">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span> Nebius Engine
+              </span>
+</div>
+</div>
+<!-- Monospace Real-time Graph SVG Simulation -->
+<div class="relative h-44 w-full bg-surface-container-lowest border border-outline-variant/70 rounded p-3 flex flex-col justify-between overflow-hidden">
+<!-- Background grid lines -->
+<div class="absolute inset-0 flex flex-col justify-between p-3 pointer-events-none opacity-20">
+<div class="border-b border-outline w-full"></div>
+<div class="border-b border-outline w-full"></div>
+<div class="border-b border-outline w-full"></div>
+<div class="border-b border-outline w-full"></div>
+</div>
+<!-- Y-axis Readouts -->
+<div class="absolute top-2 right-3 font-code-sm text-code-sm text-outline z-10">Peak: 124.8 tok/s</div>
+<div class="absolute bottom-2 left-3 font-code-sm text-code-sm text-outline z-10">T - 60s</div>
+<div class="absolute bottom-2 right-3 font-code-sm text-code-sm text-outline z-10">Current: 92.4 tok/s</div>
+<!-- Waveform SVG Line -->
+<svg class="w-full h-full relative z-0 overflow-visible" preserveAspectRatio="none" viewBox="0 0 500 120">
+<defs>
+<linearGradient id="laserGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#4edea3" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#4edea3" stop-opacity="0.0"></stop>
+</linearGradient>
+<linearGradient id="nebiusGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#d0bcff" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#d0bcff" stop-opacity="0.0"></stop>
+</linearGradient>
+</defs>
+<!-- Secondary curve -->
+<path d="M 0,90 Q 50,75 100,85 T 200,60 T 300,70 T 400,45 T 500,55 L 500,120 L 0,120 Z" fill="url(#nebiusGrad)"></path>
+<path d="M 0,90 Q 50,75 100,85 T 200,60 T 300,70 T 400,45 T 500,55" fill="none" stroke="#d0bcff" stroke-dasharray="3,3" stroke-width="1.5"></path>
+<!-- Active Primary curve with glow -->
+<path d="M 0,80 Q 60,35 120,60 T 240,40 T 360,20 T 440,35 T 500,18 L 500,120 L 0,120 Z" fill="url(#laserGrad)"></path>
+<path d="M 0,80 Q 60,35 120,60 T 240,40 T 360,20 T 440,35 T 500,18" fill="none" stroke="#4edea3" stroke-width="2.5"></path>
+<!-- Live pointer dot -->
+<circle class="animate-pulse" cx="500" cy="18" fill="#4edea3" r="4"></circle>
+</svg>
+</div>
+<!-- Graph Footer Metrics -->
+<div class="grid grid-cols-4 gap-4 mt-4 pt-3 border-t border-outline-variant/60 font-label-sm text-label-sm">
+<div>
+<span class="text-outline block">Total Invocations</span>
+<span class="font-code-md text-code-md font-semibold text-on-surface">482,910</span>
+</div>
+<div>
+<span class="text-outline block">Avg Response Time</span>
+<span class="font-code-md text-code-md font-semibold text-secondary">412ms</span>
+</div>
+<div>
+<span class="text-outline block">Error Rate</span>
+<span class="font-code-md text-code-md font-semibold text-secondary">0.002%</span>
+</div>
+<div>
+<span class="text-outline block">Cumulative Cost</span>
+<span class="font-code-md text-code-md font-semibold text-on-surface">$14.28 / 24h</span>
+</div>
+</div>
+</div>
+<!-- Right Side: Model Allocation & Health Gauge (1 Col) -->
+<div class="p-5 bg-surface-container-low border border-outline-variant rounded flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/60">
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">Agent Allocation</h3>
+<span class="font-label-sm text-label-sm text-outline">5 Agents Mapped</span>
+</div>
+<div class="space-y-3 mt-4">
+<!-- Architect Agent -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Architect Agent
+                  </span>
+<span class="font-code-sm text-code-sm text-outline">Nemotron 70B</span>
+</div>
+<div class="h-1 bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 85%"></div>
+</div>
+</div>
+<!-- Builder Agent -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Builder Agent
+                  </span>
+<span class="font-code-sm text-code-sm text-outline">Nebius Runtime</span>
+</div>
+<div class="h-1 bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="bg-tertiary h-full" style="width: 70%"></div>
+</div>
+</div>
+<!-- Red Team Adversary -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span> Red Team Agent
+                  </span>
+<span class="font-code-sm text-code-sm text-outline">Nemotron 70B</span>
+</div>
+<div class="h-1 bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="bg-primary-container h-full" style="width: 95%"></div>
+</div>
+</div>
+<!-- Repairer Agent -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Repairer Agent
+                  </span>
+<span class="font-code-sm text-code-sm text-outline">DeepSeek V3</span>
+</div>
+<div class="h-1 bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="bg-secondary-fixed h-full" style="width: 40%"></div>
+</div>
+</div>
+<!-- Judge / Evidence Verifier -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Judge Agent
+                  </span>
+<span class="font-code-sm text-code-sm text-outline">Deterministic Rule</span>
+</div>
+<div class="h-1 bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 100%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quota alert badge -->
+<div class="p-3 mt-4 rounded bg-surface-container-lowest border border-outline-variant/60 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-container text-[20px]">warning</span>
+<div class="font-body-sm text-body-sm">
+<span class="text-on-surface font-medium block">Token Consumption Spike</span>
+<span class="text-outline text-[11px]">Red Team agent utilizing 85% of standard rate limits.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- BOTTOM SECTION: Dynamic Fallback Routing Rules Table & Settings Integration -->
+<div class="p-5 bg-surface-container-low border border-outline-variant rounded">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-outline-variant gap-3">
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">Fallback &amp; Failover Routing Rules</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Deterministic fallback priorities executed when latency exceeds threshold or rate limits trip.</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded bg-surface-container border border-outline-variant hover:border-outline font-label-md text-label-md text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">add_circle</span> Add Rule
+            </button>
+<button class="px-3 py-1.5 rounded bg-primary-container text-on-primary-container hover:bg-primary font-label-md text-label-md font-semibold transition-colors">
+              Save Policy
+            </button>
+</div>
+</div>
+<!-- High Density Technical Table -->
+<div class="overflow-x-auto mt-4">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead>
+<tr class="border-b border-outline-variant text-outline font-label-sm text-label-sm uppercase">
+<th class="py-2.5 px-3">Task Scope</th>
+<th class="py-2.5 px-3">Primary Provider</th>
+<th class="py-2.5 px-3">Failover Provider</th>
+<th class="py-2.5 px-3">Threshold Trigger</th>
+<th class="py-2.5 px-3">Enforcement</th>
+<th class="py-2.5 px-3 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/40 font-code-sm text-code-sm">
+<!-- Rule 1: Adversarial Attack Generation -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2 font-medium text-on-surface">
+<span class="w-2 h-2 rounded bg-primary-container"></span>
+<span>Adversarial Attack Generation</span>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface">
+                  NVIDIA Nemotron 70B
+                </td>
+<td class="py-3 px-3 text-secondary">
+                  Nebius Token Factory (H100)
+                </td>
+<td class="py-3 px-3 text-outline">
+                  Latency &gt; 2500ms or 429 Error
+                </td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded text-[10px] bg-secondary/10 text-secondary border border-secondary/20">Active</span>
+</td>
+<td class="py-3 px-3 text-right">
+<button class="text-outline hover:text-on-surface p-1"><span class="material-symbols-outlined text-[16px]">edit</span></button>
+</td>
+</tr>
+<!-- Rule 2: Code Patch Synthesis -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2 font-medium text-on-surface">
+<span class="w-2 h-2 rounded bg-secondary"></span>
+<span>Code Patch Synthesis</span>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface">
+                  NVIDIA Nemotron 70B
+                </td>
+<td class="py-3 px-3 text-tertiary">
+                  DeepSeek V3 (MoE)
+                </td>
+<td class="py-3 px-3 text-outline">
+                  VRAM Queue &gt; 12 req
+                </td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded text-[10px] bg-secondary/10 text-secondary border border-secondary/20">Active</span>
+</td>
+<td class="py-3 px-3 text-right">
+<button class="text-outline hover:text-on-surface p-1"><span class="material-symbols-outlined text-[16px]">edit</span></button>
+</td>
+</tr>
+<!-- Rule 3: Deterministic Evidence Verification -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2 font-medium text-on-surface">
+<span class="w-2 h-2 rounded bg-outline"></span>
+<span>Deterministic Evidence Verification</span>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface">
+                  Nebius Isolated Sandbox
+                </td>
+<td class="py-3 px-3 text-outline">
+                  Local PyTest Kernel
+                </td>
+<td class="py-3 px-3 text-outline">
+                  Connection Timeout (10s)
+                </td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded text-[10px] bg-secondary/10 text-secondary border border-secondary/20">Strict Verified</span>
+</td>
+<td class="py-3 px-3 text-right">
+<button class="text-outline hover:text-on-surface p-1"><span class="material-symbols-outlined text-[16px]">edit</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+</body></html>

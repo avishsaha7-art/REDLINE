@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+:root {
+  /* Stitch Canonical Canvas & Surfaces (Obsidian Void Palette) */
+  --bg-base: #09090b;
+  --bg-surface: #0d0e12;
+  --bg-card: #0d0e12;
+  --bg-elevated: #13141b;
+  --bg-overlay: #1a1b24;
+
+  /* Stitch Hairline Borders & Structural Dividers */
+  --border-subtle: #1a1b24;
+  --border-default: #222430;
+  --border-highlight: #353748;
+
+  /* Stitch Brand Crimson Accents & Glows */
+  --brand-red: #ef4444;
+  --brand-red-hover: #dc2626;
+  --brand-red-active: #b91c1c;
+  --brand-glow: rgba(239, 68, 68, 0.22);
+  --brand-laser: rgba(239, 68, 68, 0.45);
+  --red-accent: #ef4444;
+  --red-accent-hover: #dc2626;
+  --red-glow: rgba(239, 68, 68, 0.22);
+
+  /* Stitch Functional Status Tokens */
+  --status-verified: #10b981;
+  --status-verified-text: #10b981;
+  --status-verified-bg: rgba(16, 185, 129, 0.12);
+  --status-verified-border: #059669;
+
+  --status-rejected: #ef4444;
+  --status-rejected-text: #f87171;
+  --status-rejected-bg: rgba(239, 68, 68, 0.14);
+  --status-rejected-border: #dc2626;
+
+  --status-inconclusive: #f59e0b;
+  --status-inconclusive-text: #fbbf24;
+  --status-inconclusive-bg: rgba(245, 158, 11, 0.14);
+  --status-inconclusive-border: #d97706;
+
+  --status-neural: #8b5cf6;
+  --status-active-text: #60a5fa;
+  --status-active-bg: rgba(59, 130, 246, 0.14);
+  --status-active-border: #2563eb;
+
+  --status-runtime: #06b6d4;
+
+  --status-neutral: #71717a;
+  --status-neutral-text: #a1a1aa;
+  --status-neutral-bg: rgba(113, 113, 122, 0.12);
+  --status-neutral-border: #3f3f46;
+
+  /* Stitch Typography Colors */
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --text-accent: #fca5a5;
+}
+
+@theme {
+  --color-bg-base: #09090b;
+  --color-bg-surface: #0d0e12;
+  --color-bg-card: #0d0e12;
+  --color-bg-elevated: #13141b;
+  --color-bg-overlay: #1a1b24;
+
+  --color-border-subtle: #1a1b24;
+  --color-border-default: #222430;
+  --color-border-highlight: #353748;
+
+  --color-brand-red: #ef4444;
+  --color-brand-red-hover: #dc2626;
+  --color-brand-red-active: #b91c1c;
+
+  --color-status-verified: #10b981;
+  --color-status-rejected: #ef4444;
+  --color-status-inconclusive: #f59e0b;
+  --color-status-neural: #8b5cf6;
+  --color-status-runtime: #06b6d4;
+
+  --color-text-primary: #f4f4f5;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+}
+
+body {
+  background-color: #09090b;
+  color: #f4f4f5;
+  font-family: Geist, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Monospace font standard */
+code, kbd, samp, pre, .font-mono {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Custom dark scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222430;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #353748;
+}
+
+/* Stitch Laser & Radiant Glow Utilities */
+.red-glow {
+  box-shadow: 0 0 20px -3px rgba(239, 68, 68, 0.28);
+}
+
+.red-glow-subtle {
+  box-shadow: 0 0 12px -2px rgba(239, 68, 68, 0.16);
+}
+
+.red-glow-active {
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.38);
+}
+
+.red-border-glow {
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 12px -2px rgba(239, 68, 68, 0.25);
+}
+
+.card-laser-border {
+  border: 1px solid #222430;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-laser-border:hover {
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 14px -3px rgba(239, 68, 68, 0.22);
+}
+
+/* Accessible focus outline */
+:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+/* Reduced motion media query guard */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

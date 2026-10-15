@@ -1,0 +1,658 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>REDLINE // 03. Projects</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#5516be",
+            "error-container": "#93000a",
+            "primary-container": "#ff5451",
+            "surface-container-high": "#2a2a2c",
+            "outline-variant": "#5b403e",
+            "tertiary-container": "#a078ff",
+            "surface-container-low": "#1c1b1d",
+            "error": "#ffb4ab",
+            "on-error-container": "#ffdad6",
+            "inverse-primary": "#b91a24",
+            "secondary-fixed": "#6ffbbe",
+            "surface-bright": "#39393b",
+            "inverse-on-surface": "#313032",
+            "on-secondary-fixed-variant": "#005236",
+            "surface-dim": "#131315",
+            "on-tertiary-container": "#340080",
+            "secondary": "#4edea3",
+            "on-primary-fixed-variant": "#930013",
+            "tertiary": "#d0bcff",
+            "on-surface-variant": "#e4beba",
+            "on-primary": "#68000a",
+            "on-error": "#690005",
+            "secondary-container": "#00a572",
+            "background": "#131315",
+            "on-secondary-container": "#00311f",
+            "on-background": "#e5e1e4",
+            "surface-variant": "#353437",
+            "secondary-fixed-dim": "#4edea3",
+            "surface-container": "#201f22",
+            "on-secondary-fixed": "#002113",
+            "outline": "#ab8986",
+            "on-tertiary-fixed": "#23005c",
+            "on-surface": "#e5e1e4",
+            "on-tertiary": "#3c0091",
+            "primary-fixed": "#ffdad7",
+            "surface-container-highest": "#353437",
+            "surface-container-lowest": "#0e0e10",
+            "tertiary-fixed": "#e9ddff",
+            "primary": "#ffb3ad",
+            "surface": "#131315",
+            "on-secondary": "#003824",
+            "inverse-surface": "#e5e1e4",
+            "surface-tint": "#ffb3ad",
+            "on-primary-fixed": "#410004",
+            "primary-fixed-dim": "#ffb3ad",
+            "tertiary-fixed-dim": "#d0bcff",
+            "on-primary-container": "#5c0008"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-lg": "1rem",
+            "space-xs": "0.25rem",
+            "space-xl": "1.5rem",
+            "space-md": "0.75rem",
+            "margin-mobile": "1rem",
+            "space-2xl": "2rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "gutter": "1rem",
+            "gutter-compact": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["JetBrains Mono"],
+            "body-md": ["Geist"],
+            "code-lg": ["JetBrains Mono"],
+            "label-md": ["JetBrains Mono"],
+            "headline-xl-mobile": ["Geist"],
+            "headline-md": ["Geist"],
+            "body-lg": ["Geist"],
+            "headline-xl": ["Geist"],
+            "code-md": ["JetBrains Mono"],
+            "headline-lg": ["Geist"],
+            "body-sm": ["Geist"],
+            "code-sm": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "500" }],
+            "body-md": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "code-lg": ["13px", { "lineHeight": "20px", "fontWeight": "500" }],
+            "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-md": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "code-md": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "code-sm": ["11px", { "lineHeight": "16px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 16px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0e0e10;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #2a2a2c;
+      border-radius: 2px;
+    }
+    .card-laser-hover {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-laser-hover:hover {
+      border-color: rgba(255, 84, 81, 0.45);
+      box-shadow: 0 0 16px -2px rgba(239, 68, 68, 0.25);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-hidden flex flex-col h-screen select-none font-body-md text-body-md">
+<!-- ================= TOP MISSION CONTROL BAR ================= -->
+<header class="flex justify-between items-center w-full px-6 h-14 bg-surface-container-lowest border-b border-outline-variant shrink-0 z-30">
+<!-- Brand Anchor & Slogan -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2.5">
+<!-- REDLINE Crimson Chevron SVG -->
+<svg class="w-6 h-6 text-primary-container shrink-0" fill="currentColor" viewBox="0 0 32 32">
+<path d="M5 23.5L14 7L18.5 7L9.5 23.5H5Z"></path>
+<path d="M14 23.5L23 7L27.5 7L18.5 23.5H14Z"></path>
+</svg>
+<span class="font-headline-lg text-headline-lg font-black tracking-tight text-on-surface">REDLINE</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant/60"></div>
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant font-label-md text-label-md tracking-wider">AI-generated code is guilty until proven safe.</span>
+</div>
+</div>
+<!-- Center Navigation Links -->
+<nav class="hidden lg:flex items-center gap-8">
+<a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm uppercase tracking-wider" href="#">Build</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm uppercase tracking-wider" href="#">Attack</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm uppercase tracking-wider" href="#">Repair</a>
+<a class="text-secondary font-label-sm text-label-sm uppercase tracking-wider relative flex items-center gap-1.5" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+        Verify
+      </a>
+</nav>
+<!-- Trailing Actions & Telemetry Integrations -->
+<div class="flex items-center gap-3">
+<!-- Nebius Token Factory badge -->
+<div class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container border border-outline-variant/50">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Nebius Token Factory</span>
+<span class="text-[9px] font-label-sm px-1 py-0.2 rounded bg-surface-container-high text-secondary">Active</span>
+</div>
+<!-- NVIDIA Nemotron badge -->
+<div class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container border border-outline-variant/50">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-label-sm text-label-sm text-on-surface">NVIDIA Nemotron</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant/60 hidden sm:block"></div>
+<!-- Action Icons -->
+<button class="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Notifications">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Split Screen Pane">
+<span class="material-symbols-outlined">splitscreen</span>
+</button>
+<!-- Profile Avatar -->
+<div class="w-7 h-7 rounded bg-primary-container/20 border border-primary-container/40 flex items-center justify-center text-primary font-label-sm text-label-sm font-bold ml-1 cursor-pointer">
+        R
+      </div>
+</div>
+</header>
+<!-- ================= APP WORKSPACE BODY ================= -->
+<div class="flex flex-1 w-full overflow-hidden">
+<!-- ================= SIDEBAR ================= -->
+<aside class="w-60 flex flex-col p-4 gap-6 shrink-0 border-r border-outline-variant bg-surface-container-lowest justify-between h-full z-20">
+<!-- Top Group: Brand Mini & New Task CTA & Navigation items -->
+<div class="flex flex-col gap-4">
+<!-- Sub-header branding info -->
+<div class="flex items-center gap-3 px-1">
+<div class="w-7 h-7 rounded bg-error-container/40 border border-primary-container/60 flex items-center justify-center text-primary-container">
+<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 32 32">
+<path d="M5 23.5L14 7L18.5 7L9.5 23.5H5Z"></path>
+<path d="M14 23.5L23 7L27.5 7L18.5 23.5H14Z"></path>
+</svg>
+</div>
+<div>
+<div class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface leading-none">REDLINE</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1">Autonomous Security Eng</div>
+</div>
+</div>
+<!-- + New Task Primary CTA Button -->
+<button class="w-full h-8 px-3 rounded bg-primary-container hover:bg-primary-container/90 text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 tracking-wide transition-all duration-150 active:scale-[0.98] shadow-[0_0_12px_-2px_rgba(255,84,81,0.4)]">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>+ New Task</span>
+</button>
+<!-- Navigation Tab Links -->
+<nav class="flex flex-col gap-1 mt-1">
+<!-- Home -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span>Home</span>
+</a>
+<!-- Projects (ACTIVE Destination) -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-container-high text-primary border-l-2 border-primary font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">folder_open</span>
+<span>Projects</span>
+</a>
+<!-- Repositories -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">source</span>
+<span>Repositories</span>
+</a>
+<!-- Agents -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span>Agents</span>
+</a>
+<!-- Sessions -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span>Sessions</span>
+</a>
+<!-- Playground -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">code_blocks</span>
+<span>Playground</span>
+</a>
+<!-- Evidence -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+<span>Evidence</span>
+</a>
+<!-- Models -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">neurology</span>
+<span>Models</span>
+</a>
+<!-- Settings -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Footer Tab & Workspace Switcher -->
+<div class="border-t border-outline-variant/50 pt-3">
+<button class="w-full flex items-center justify-between px-2.5 py-2 rounded bg-surface-container-low hover:bg-surface-container text-on-surface border border-outline-variant/40 transition-colors">
+<div class="flex items-center gap-2 overflow-hidden">
+<div class="w-5 h-5 rounded-full bg-primary-container/20 text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xs">account_circle</span>
+</div>
+<span class="font-label-md text-label-md truncate">Personal Workspace</span>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant">unfold_more</span>
+</button>
+</div>
+</aside>
+<!-- ================= MAIN CANVAS ================= -->
+<main class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-surface-dim flex flex-col gap-6">
+<!-- ================= HEADER SECTION (Card 03 Inspired) ================= -->
+<section class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant/50 pb-5">
+<div>
+<div class="flex items-center gap-2.5">
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container text-primary-container border border-primary-container/30">03</span>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">Projects</h1>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage your projects and repositories.</p>
+</div>
+<!-- Metric Telemetry Quick Readout -->
+<div class="flex items-center gap-4 text-on-surface-variant">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded bg-surface-container-lowest border border-outline-variant/60">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm">Active Agents: <strong class="text-on-surface">14</strong></span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded bg-surface-container-lowest border border-outline-variant/60">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-sm text-label-sm">Vulnerabilities Defended: <strong class="text-on-surface">128</strong></span>
+</div>
+</div>
+</section>
+<!-- ================= FILTER CONTROLS BAR ================= -->
+<section class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+<!-- Left: Search Box & Filter Status Pills -->
+<div class="flex flex-wrap items-center gap-3">
+<!-- Search input field with terminal prompt prefix -->
+<div class="relative w-full sm:w-72">
+<span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">search</span>
+</span>
+<input class="w-full pl-8 pr-3 py-1.5 rounded bg-surface-container-lowest border border-outline-variant text-on-surface placeholder:text-on-surface-variant font-code-md text-code-md focus:border-primary-container focus:ring-0 focus:outline-none transition-colors" placeholder="Search projects..." type="text">
+</div>
+<!-- Segment Filter Pills (All (6), Active (4), Archived (2)) -->
+<div class="flex items-center p-0.5 rounded bg-surface-container-lowest border border-outline-variant">
+<button class="px-3 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold tracking-wide shadow-sm">
+              All (6)
+            </button>
+<button class="px-3 py-1 rounded text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm tracking-wide transition-colors">
+              Active (4)
+            </button>
+<button class="px-3 py-1 rounded text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm tracking-wide transition-colors">
+              Archived (2)
+            </button>
+</div>
+</div>
+<!-- Right: Primary Action CTA Button -->
+<button class="h-8 px-4 rounded bg-primary-container hover:bg-primary-container/90 text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-1.5 transition-all duration-150 active:scale-[0.98] shadow-[0_0_12px_-2px_rgba(255,84,81,0.4)] shrink-0">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>+ New Project</span>
+</button>
+</section>
+<!-- ================= PROJECTS BENTO GRID (6 CARDS ACCORDING TO 03. PROJECTS SPEC) ================= -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- CARD 1: payment-api -->
+<article class="card-laser-hover flex flex-col justify-between p-4 rounded-lg bg-surface-container-lowest border border-outline-variant/80 relative group overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary-container/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div>
+<!-- Card Header -->
+<div class="flex items-start justify-between gap-3 mb-2">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded bg-surface-container border border-outline-variant/60 flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">folder</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-headline-md font-semibold text-on-surface group-hover:text-primary-fixed transition-colors">payment-api</h3>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary" title="Active"></span>
+</div>
+</div>
+</div>
+<button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+<!-- Subtitle -->
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">
+              Payment processing API with fraud detection
+            </p>
+<!-- Language & Framework Tags -->
+<div class="flex flex-wrap items-center gap-1.5 mb-4">
+<span class="flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-on-surface font-code-sm text-code-sm border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Python
+              </span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface font-code-sm text-code-sm border border-outline-variant/40">
+                FastAPI
+              </span>
+</div>
+</div>
+<!-- Card Footer Telemetry -->
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/40 font-code-sm text-code-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs">fork_right</span>
+<span>main</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">schedule</span>
+<span>1 hours ago</span>
+</div>
+</div>
+</article>
+<!-- CARD 2: auth-service -->
+<article class="card-laser-hover flex flex-col justify-between p-4 rounded-lg bg-surface-container-lowest border border-outline-variant/80 relative group overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary-container/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div>
+<!-- Card Header -->
+<div class="flex items-start justify-between gap-3 mb-2">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded bg-surface-container border border-outline-variant/60 flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">key</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-headline-md font-semibold text-on-surface group-hover:text-primary-fixed transition-colors">auth-service</h3>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary" title="Active"></span>
+</div>
+</div>
+</div>
+<button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+<!-- Subtitle -->
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">
+              Authentication &amp; user management
+            </p>
+<!-- Language & Framework Tags -->
+<div class="flex flex-wrap items-center gap-1.5 mb-4">
+<span class="flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-on-surface font-code-sm text-code-sm border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Python
+              </span>
+</div>
+</div>
+<!-- Card Footer Telemetry -->
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/40 font-code-sm text-code-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs">fork_right</span>
+<span>main</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">schedule</span>
+<span>1 day ago</span>
+</div>
+</div>
+</article>
+<!-- CARD 3: trading-bot -->
+<article class="card-laser-hover flex flex-col justify-between p-4 rounded-lg bg-surface-container-lowest border border-outline-variant/80 relative group overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary-container/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div>
+<!-- Card Header -->
+<div class="flex items-start justify-between gap-3 mb-2">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded bg-surface-container border border-outline-variant/60 flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">candlestick_chart</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-headline-md font-semibold text-on-surface group-hover:text-primary-fixed transition-colors">trading-bot</h3>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary" title="Active"></span>
+</div>
+</div>
+</div>
+<button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+<!-- Subtitle -->
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">
+              Crypto trading bot with backtesting
+            </p>
+<!-- Language & Framework Tags -->
+<div class="flex flex-wrap items-center gap-1.5 mb-4">
+<span class="flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-on-surface font-code-sm text-code-sm border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Python
+              </span>
+</div>
+</div>
+<!-- Card Footer Telemetry -->
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/40 font-code-sm text-code-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs">fork_right</span>
+<span>main</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">schedule</span>
+<span>2 days ago</span>
+</div>
+</div>
+</article>
+<!-- CARD 4: document-ai -->
+<article class="card-laser-hover flex flex-col justify-between p-4 rounded-lg bg-surface-container-lowest border border-outline-variant/80 relative group overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary-container/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div>
+<!-- Card Header -->
+<div class="flex items-start justify-between gap-3 mb-2">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded bg-surface-container border border-outline-variant/60 flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-headline-md font-semibold text-on-surface group-hover:text-primary-fixed transition-colors">document-ai</h3>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary" title="Active"></span>
+</div>
+</div>
+</div>
+<button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+<!-- Subtitle -->
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">
+              Document analysis and RAG
+            </p>
+<!-- Language & Framework Tags -->
+<div class="flex flex-wrap items-center gap-1.5 mb-4">
+<span class="flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-on-surface font-code-sm text-code-sm border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Python
+              </span>
+</div>
+</div>
+<!-- Card Footer Telemetry -->
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/40 font-code-sm text-code-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs">fork_right</span>
+<span>main</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">schedule</span>
+<span>3 days ago</span>
+</div>
+</div>
+</article>
+<!-- CARD 5: web-scraper -->
+<article class="card-laser-hover flex flex-col justify-between p-4 rounded-lg bg-surface-container-lowest border border-outline-variant/80 relative group overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary-container/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div>
+<!-- Card Header -->
+<div class="flex items-start justify-between gap-3 mb-2">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded bg-surface-container border border-outline-variant/60 flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">public</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-headline-md font-semibold text-on-surface group-hover:text-primary-fixed transition-colors">web-scraper</h3>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary" title="Active"></span>
+</div>
+</div>
+</div>
+<button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+<!-- Subtitle -->
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">
+              Intelligent web scraping agent
+            </p>
+<!-- Language & Framework Tags -->
+<div class="flex flex-wrap items-center gap-1.5 mb-4">
+<span class="flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-on-surface font-code-sm text-code-sm border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Python
+              </span>
+</div>
+</div>
+<!-- Card Footer Telemetry -->
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/40 font-code-sm text-code-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs">fork_right</span>
+<span>main</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">schedule</span>
+<span>5 days ago</span>
+</div>
+</div>
+</article>
+<!-- CARD 6: ml-pipeline -->
+<article class="card-laser-hover flex flex-col justify-between p-4 rounded-lg bg-surface-container-lowest border border-outline-variant/80 relative group overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary-container/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div>
+<!-- Card Header -->
+<div class="flex items-start justify-between gap-3 mb-2">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded bg-surface-container border border-outline-variant/60 flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">neurology</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-headline-md font-semibold text-on-surface group-hover:text-primary-fixed transition-colors">ml-pipeline</h3>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary" title="Active"></span>
+</div>
+</div>
+</div>
+<button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+<!-- Subtitle -->
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">
+              ML model training pipeline
+            </p>
+<!-- Language & Framework Tags -->
+<div class="flex flex-wrap items-center gap-1.5 mb-4">
+<span class="flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-on-surface font-code-sm text-code-sm border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Python
+              </span>
+</div>
+</div>
+<!-- Card Footer Telemetry -->
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/40 font-code-sm text-code-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs">fork_right</span>
+<span>main</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">schedule</span>
+<span>1 week ago</span>
+</div>
+</div>
+</article>
+</section>
+<!-- ================= MISSION STATUS DOCK / TELEMETRY OVERVIEW ================= -->
+<section class="mt-auto p-3 rounded-lg bg-surface-container-lowest border border-outline-variant/60 flex flex-wrap items-center justify-between gap-4 font-label-sm text-label-sm text-on-surface-variant">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Nebius Token Cluster: <strong class="text-on-surface">ONLINE (4.2ms)</strong></span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>Deterministic Red Team: <strong class="text-on-surface">ARMED</strong></span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span>CPU</span>
+<div class="w-20 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[22%]"></div>
+</div>
+<span class="text-on-surface">22%</span>
+</div>
+<div class="flex items-center gap-2">
+<span>RAM</span>
+<div class="w-20 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[40%]"></div>
+</div>
+<span class="text-on-surface">6.4 / 16 GB</span>
+</div>
+<div class="flex items-center gap-2">
+<span>STORAGE</span>
+<div class="w-20 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[12%]"></div>
+</div>
+<span class="text-on-surface">12 / 100 GB</span>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Inline Micro-interactions for interactive feedback -->
+<script>
+    document.querySelectorAll('.card-laser-hover').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.borderColor = 'rgba(255, 84, 81, 0.45)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.borderColor = '';
+      });
+    });
+  </script>
+</body></html>

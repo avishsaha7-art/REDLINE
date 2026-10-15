@@ -1,0 +1,563 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>REDLINE - 10. Settings</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: JetBrains Mono & Geist -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#5516be",
+            "error-container": "#93000a",
+            "primary-container": "#ff5451",
+            "surface-container-high": "#2a2a2c",
+            "outline-variant": "#5b403e",
+            "tertiary-container": "#a078ff",
+            "surface-container-low": "#1c1b1d",
+            "error": "#ffb4ab",
+            "on-error-container": "#ffdad6",
+            "inverse-primary": "#b91a24",
+            "secondary-fixed": "#6ffbbe",
+            "surface-bright": "#39393b",
+            "inverse-on-surface": "#313032",
+            "on-secondary-fixed-variant": "#005236",
+            "surface-dim": "#131315",
+            "on-tertiary-container": "#340080",
+            "secondary": "#4edea3",
+            "on-primary-fixed-variant": "#930013",
+            "tertiary": "#d0bcff",
+            "on-surface-variant": "#e4beba",
+            "on-primary": "#68000a",
+            "on-error": "#690005",
+            "secondary-container": "#00a572",
+            "background": "#131315",
+            "on-secondary-container": "#00311f",
+            "on-background": "#e5e1e4",
+            "surface-variant": "#353437",
+            "secondary-fixed-dim": "#4edea3",
+            "surface-container": "#201f22",
+            "on-secondary-fixed": "#002113",
+            "outline": "#ab8986",
+            "on-tertiary-fixed": "#23005c",
+            "on-surface": "#e5e1e4",
+            "on-tertiary": "#3c0091",
+            "primary-fixed": "#ffdad7",
+            "surface-container-highest": "#353437",
+            "surface-container-lowest": "#0e0e10",
+            "tertiary-fixed": "#e9ddff",
+            "primary": "#ffb3ad",
+            "surface": "#131315",
+            "on-secondary": "#003824",
+            "inverse-surface": "#e5e1e4",
+            "surface-tint": "#ffb3ad",
+            "on-primary-fixed": "#410004",
+            "primary-fixed-dim": "#ffb3ad",
+            "tertiary-fixed-dim": "#d0bcff",
+            "on-primary-container": "#5c0008"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-lg": "1rem",
+            "space-xs": "0.25rem",
+            "space-xl": "1.5rem",
+            "space-md": "0.75rem",
+            "margin-mobile": "1rem",
+            "space-2xl": "2rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "gutter": "1rem",
+            "gutter-compact": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["JetBrains Mono"],
+            "body-md": ["Geist"],
+            "code-lg": ["JetBrains Mono"],
+            "label-md": ["JetBrains Mono"],
+            "headline-xl-mobile": ["Geist"],
+            "headline-md": ["Geist"],
+            "body-lg": ["Geist"],
+            "headline-xl": ["Geist"],
+            "code-md": ["JetBrains Mono"],
+            "headline-lg": ["Geist"],
+            "body-sm": ["Geist"],
+            "code-sm": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "500" }],
+            "body-md": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "code-lg": ["13px", { "lineHeight": "20px", "fontWeight": "500" }],
+            "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-md": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "code-md": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "code-sm": ["11px", { "lineHeight": "16px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0e0e10;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #2a2a2c;
+      border-radius: 2px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #5b403e;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased selection:bg-error-container selection:text-on-error-container overflow-hidden h-screen flex flex-col font-body-md">
+<!-- Top Navigation Bar (Shared Component: TopNavBar) -->
+<header class="flex justify-between items-center w-full px-6 h-14 bg-surface-container-lowest dark:bg-surface-container-lowest border-b border-outline-variant dark:border-outline-variant shrink-0 z-50">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<!-- REDLINE Crimson Chevron Logo Mark -->
+<div class="flex items-center justify-center w-8 h-8 rounded bg-surface-container-low border border-outline-variant/60 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
+<svg class="w-5 h-5 text-primary-container" fill="currentColor" viewBox="0 0 24 24">
+<path d="M4 4h5.2l7.6 8-7.6 8H4l7.6-8L4 4z"></path>
+<path d="M12 4h4.8l5.2 5.5-2.6 2.7-2.6-2.7L12 4z" fill="#ffb3ad"></path>
+</svg>
+</div>
+<div class="flex items-baseline gap-2.5">
+<span class="font-headline-lg text-headline-lg font-black tracking-tight text-on-surface dark:text-on-surface">REDLINE</span>
+<span class="hidden xl:inline-block font-label-sm text-label-sm text-on-surface-variant/70 border-l border-outline-variant/50 pl-2.5 tracking-wide">
+            AI-generated code is guilty until proven safe.
+          </span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-6 ml-4">
+<a class="text-on-surface-variant dark:text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider hover:text-on-surface dark:hover:text-on-surface transition-colors flex items-center gap-1.5 py-1" href="#build">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span> BUILD
+        </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider hover:text-on-surface dark:hover:text-on-surface transition-colors flex items-center gap-1.5 py-1" href="#attack">
+<span class="w-1.5 h-1.5 rounded-full bg-error-container"></span> ATTACK
+        </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider hover:text-on-surface dark:hover:text-on-surface transition-colors flex items-center gap-1.5 py-1" href="#repair">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> REPAIR
+        </a>
+<a class="text-secondary dark:text-secondary font-label-sm text-label-sm uppercase tracking-wider transition-colors flex items-center gap-1.5 py-1 border-b-2 border-secondary/60" href="#verify">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> VERIFY
+        </a>
+</nav>
+</div>
+<!-- Trailing Actions & Badges -->
+<div class="flex items-center gap-3">
+<!-- Nebius Token Factory badge -->
+<div class="flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant/70 font-label-sm text-label-sm text-on-surface shadow-inner">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+<span class="text-on-surface-variant font-label-sm">Nebius Token Factory</span>
+<span class="text-secondary font-semibold font-label-sm">Active</span>
+</div>
+<!-- NVIDIA Nemotron badge -->
+<div class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant/70 font-label-sm text-label-sm text-on-surface">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-on-surface-variant font-label-sm">NVIDIA Nemotron</span>
+<span class="text-tertiary font-semibold font-label-sm">Ready</span>
+</div>
+<!-- Split / Notification triggers -->
+<div class="flex items-center gap-1 border-l border-outline-variant/50 pl-3">
+<button class="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Splitscreen Pane">
+<span class="material-symbols-outlined text-[18px]">splitscreen</span>
+</button>
+<button class="relative w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Notifications">
+<span class="material-symbols-outlined text-[18px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+</button>
+</div>
+<!-- Profile Avatar -->
+<div class="w-7 h-7 rounded border border-outline-variant flex items-center justify-center bg-surface-container-high text-primary font-label-md text-label-md font-bold tracking-tighter" title="User Profile Avatar">
+        RL
+      </div>
+</div>
+</header>
+<!-- App Workspace Body (Sidebar + Content Canvas) -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Left Sidebar (Shared Component: SideNavBar) -->
+<aside class="w-60 flex flex-col p-4 gap-6 shrink-0 border-r border-outline-variant dark:border-outline-variant bg-surface-container-lowest dark:bg-surface-container-lowest h-[calc(100vh-3.5rem)] select-none">
+<!-- Brand & Quick CTA -->
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-2 px-1">
+<div class="w-5 h-5 rounded bg-error-container/40 flex items-center justify-center text-primary border border-outline-variant">
+<span class="material-symbols-outlined text-[14px]">shield_lock</span>
+</div>
+<div>
+<div class="font-headline-md text-[14px] leading-none font-bold text-on-surface tracking-tight">REDLINE</div>
+<div class="font-label-sm text-[9px] text-on-surface-variant tracking-wider uppercase opacity-80 mt-0.5">Autonomous Security Eng</div>
+</div>
+</div>
+<!-- + New Task Primary Action -->
+<button class="flex items-center justify-center gap-2 w-full py-2 px-3 rounded bg-primary-container hover:bg-primary-container/90 text-on-primary-container font-label-md text-label-md font-semibold tracking-wide transition-all shadow-[0_0_12px_rgba(255,84,81,0.25)] active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>+ New Task</span>
+</button>
+</div>
+<!-- Navigation Tabs (Item: Settings ACTIVE) -->
+<nav class="flex flex-col gap-1 flex-1 overflow-y-auto custom-scrollbar pr-1">
+<!-- Tab: Home -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md transition-colors" href="#home">
+<span class="material-symbols-outlined text-[18px]">home</span>
+<span>Home</span>
+</a>
+<!-- Tab: Projects -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md transition-colors" href="#projects">
+<span class="material-symbols-outlined text-[18px]">folder_open</span>
+<span>Projects</span>
+</a>
+<!-- Tab: Repositories -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md transition-colors" href="#repositories">
+<span class="material-symbols-outlined text-[18px]">source</span>
+<span>Repositories</span>
+</a>
+<!-- Tab: Agents -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md transition-colors" href="#agents">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+<span>Agents</span>
+</a>
+<!-- Tab: Sessions -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md transition-colors" href="#sessions">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span>Sessions</span>
+</a>
+<!-- Tab: Playground -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md transition-colors" href="#playground">
+<span class="material-symbols-outlined text-[18px]">code_blocks</span>
+<span>Playground</span>
+</a>
+<!-- Tab: Evidence -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md transition-colors" href="#evidence">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span>Evidence</span>
+</a>
+<!-- Tab: Models -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md transition-colors" href="#models">
+<span class="material-symbols-outlined text-[18px]">neurology</span>
+<span>Models</span>
+</a>
+<!-- Tab: Settings (MANDATORY ACTIVE SELECTION) -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-container-high dark:bg-surface-container-high text-primary dark:text-primary border-l-2 border-primary dark:border-primary font-label-md text-label-md" href="#settings">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+<span class="font-semibold">Settings</span>
+</a>
+</nav>
+<!-- Sidebar Footer (Personal Workspace) -->
+<div class="pt-3 border-t border-outline-variant/60">
+<div class="flex items-center gap-2.5 px-2 py-2 rounded bg-surface-container-low border border-outline-variant/40 text-on-surface-variant hover:border-outline-variant transition-colors">
+<span class="material-symbols-outlined text-[20px] text-tertiary">account_circle</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate font-medium">Personal Workspace</span>
+<span class="font-label-sm text-[9px] text-secondary leading-none">SGX Enclave Active</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area: 10. Settings Screen -->
+<main class="flex-1 overflow-y-auto custom-scrollbar bg-background p-6 space-y-6">
+<!-- Screen Header with Cyber-Telemetry Breadcrumb -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-outline-variant">
+<div>
+<div class="flex items-center gap-2.5 mb-1">
+<span class="font-label-md text-label-md px-1.5 py-0.5 rounded bg-surface-container-high text-primary border border-outline-variant font-mono">10.</span>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">Settings</h1>
+<span class="font-label-sm text-label-sm text-secondary px-2 py-0.5 rounded bg-secondary-container/20 border border-secondary/30 ml-2">MISSION_CONTROL_V4</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your workspace, integrations, and preferences.</p>
+</div>
+<!-- Telemetry Summary Badges -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded bg-surface-container-lowest border border-outline-variant/80">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-[9px] text-on-surface-variant leading-none">ATTESTATION KEY</span>
+<span class="font-code-sm text-code-sm text-on-surface font-mono">0x9f4a...2e1c</span>
+</div>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded bg-surface-container-lowest border border-outline-variant/80">
+<span class="material-symbols-outlined text-[16px] text-tertiary">memory</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-[9px] text-on-surface-variant leading-none">INFERENCE BACKEND</span>
+<span class="font-code-sm text-code-sm text-on-surface font-mono">Nemotron 70B</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Settings Horizontal Sub-Navigation Tabs -->
+<div class="flex items-center gap-1 border-b border-outline-variant/70 overflow-x-auto no-scrollbar">
+<button class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-primary border-b-2 border-primary bg-surface-container-low/40 rounded-t whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">domain</span>
+<span>Workspace</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">hub</span>
+<span>Integrations</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">lock_reset</span>
+<span>Sandbox &amp; Safety</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Model Configuration</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">notifications_active</span>
+<span>Notifications</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">credit_card</span>
+<span>API &amp; Billing</span>
+</button>
+</div>
+<!-- Settings Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left 7-cols: Workspace Identity & Security Policy Form Panels -->
+<div class="lg:col-span-7 space-y-6">
+<!-- Panel 1: Workspace Identity -->
+<div class="rounded bg-surface-container-lowest border border-outline-variant p-5 space-y-5 relative shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/60">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-primary">badge</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight">Workspace Identity</h2>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant/80 font-mono">WS_ID: redline-sec-core</span>
+</div>
+<!-- Form Content -->
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<!-- Name Input -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5 uppercase tracking-wider" for="workspace-name">
+                  Name
+                </label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant font-mono text-[12px]">&gt;</span>
+<input class="w-full pl-8 pr-3 py-2 bg-surface-container-low border border-outline-variant rounded font-code-md text-code-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none transition-colors" id="workspace-name" type="text" value="Redline">
+</div>
+</div>
+<!-- Description Input -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5 uppercase tracking-wider" for="workspace-desc">
+                  Description
+                </label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant font-mono text-[12px]">&gt;</span>
+<input class="w-full pl-8 pr-3 py-2 bg-surface-container-low border border-outline-variant rounded font-code-md text-code-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none transition-colors" id="workspace-desc" type="text" value="Personal workspace for AI software engineering">
+</div>
+</div>
+<!-- Theme Selector -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5 uppercase tracking-wider" for="workspace-theme">
+                  Theme
+                </label>
+<div class="relative">
+<select class="w-full px-3 py-2 bg-surface-container-low border border-outline-variant rounded font-code-md text-code-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none appearance-none cursor-pointer" id="workspace-theme">
+<option selected="" value="dark-system">Dark (System)</option>
+<option value="obsidian-void">Obsidian Void (High Contrast)</option>
+<option value="crimson-alert">Crimson Telemetry</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Action button: Save Changes (Crimson Red Button matching reference Card 10) -->
+<div class="pt-3 flex items-center justify-between border-t border-outline-variant/60">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">Unsaved changes: 0</span>
+<button class="px-5 py-2 rounded bg-primary-container hover:bg-primary-container/90 text-on-primary-container font-label-md text-label-md font-bold tracking-wide transition-all shadow-[0_0_12px_rgba(255,84,81,0.3)] active:scale-[0.98]" type="submit">
+                  Save Changes
+                </button>
+</div>
+</form>
+</div>
+<!-- Panel 2: Security & Enclave Policies -->
+<div class="rounded bg-surface-container-lowest border border-outline-variant p-5 space-y-5 relative shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/60">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-secondary">shield</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight">Security &amp; Enclave Policies</h2>
+</div>
+<span class="px-2 py-0.5 rounded bg-secondary/10 border border-secondary/30 text-secondary font-label-sm text-label-sm uppercase">Guilty Until Safe</span>
+</div>
+<div class="space-y-4">
+<!-- Enclave Isolation Level -->
+<div class="p-3.5 rounded bg-surface-container-low border border-outline-variant/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div class="space-y-1">
+<div class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Enclave Isolation Level</div>
+<div class="font-code-sm text-code-sm text-primary flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+                    Tier 3 (Firecracker MicroVMs + SGX Hardware Attestation)
+                  </div>
+<div class="font-body-sm text-[11px] text-on-surface-variant">Ephemeral microVM boot in &lt;12ms with encrypted kernel memory paging.</div>
+</div>
+<span class="px-2.5 py-1 rounded bg-surface-container-high border border-outline-variant font-label-sm text-label-sm text-secondary shrink-0 font-mono self-start sm:self-center">
+                  L3 ENFORCED
+                </span>
+</div>
+<!-- Adversarial Fuzzing Severity Toggle -->
+<div class="p-3.5 rounded bg-surface-container-low border border-outline-variant/60 flex items-center justify-between">
+<div class="space-y-1 pr-4">
+<div class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Adversarial Fuzzing Severity</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Inject zero-day prompts, buffer overruns, and logic race conditions automatically prior to diff merge.</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-primary-container font-mono font-bold">Strict / Armed</span>
+<!-- Stylized Toggle (Active) -->
+<div class="w-11 h-6 flex items-center bg-primary-container/30 border border-primary-container rounded-full p-0.5 cursor-pointer shadow-[0_0_8px_rgba(255,84,81,0.2)]">
+<div class="bg-primary-container w-4 h-4 rounded-full shadow-md transform translate-x-5 transition-transform"></div>
+</div>
+</div>
+</div>
+<!-- Autonomous PR Commit Rights Toggle -->
+<div class="p-3.5 rounded bg-surface-container-low border border-outline-variant/60 flex items-center justify-between">
+<div class="space-y-1 pr-4">
+<div class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Autonomous PR Commit Rights</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Require Human Sign-off on High-Risk Diffs with CVE impact scores above 4.0.</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-secondary font-mono font-bold">Enforced</span>
+<!-- Stylized Toggle (Active) -->
+<div class="w-11 h-6 flex items-center bg-secondary-container/40 border border-secondary rounded-full p-0.5 cursor-pointer shadow-[0_0_8px_rgba(78,222,163,0.2)]">
+<div class="bg-secondary w-4 h-4 rounded-full shadow-md transform translate-x-5 transition-transform"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right 5-cols: Live Telemetry, Token Quotas, API Key Enclave & Active Agents -->
+<div class="lg:col-span-5 space-y-6">
+<!-- Token Factory & Inference Quota Card -->
+<div class="rounded bg-surface-container-lowest border border-outline-variant p-5 space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/60">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-tertiary">speed</span>
+<h3 class="font-headline-md text-[15px] font-semibold text-on-surface tracking-tight">Token Factory Telemetry</h3>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-mono">LIVE FEED</span>
+</div>
+<!-- Segmented Gauge: CPU / Load -->
+<div class="space-y-1.5">
+<div class="flex justify-between font-label-sm text-label-sm font-mono">
+<span class="text-on-surface-variant">CPU / LOAD</span>
+<span class="text-primary font-bold">22%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/40">
+<div class="h-full bg-primary-container rounded-full transition-all duration-500" style="width: 22%"></div>
+</div>
+</div>
+<!-- Segmented Gauge: Memory / VRAM -->
+<div class="space-y-1.5">
+<div class="flex justify-between font-label-sm text-label-sm font-mono">
+<span class="text-on-surface-variant">MEMORY / VRAM</span>
+<span class="text-tertiary font-bold">6.4 / 16 GB (40%)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/40">
+<div class="h-full bg-tertiary rounded-full transition-all duration-500" style="width: 40%"></div>
+</div>
+</div>
+<!-- Segmented Gauge: Storage / Isolated MicroVM Cache -->
+<div class="space-y-1.5">
+<div class="flex justify-between font-label-sm text-label-sm font-mono">
+<span class="text-on-surface-variant">STORAGE / ATTESTATION LOGS</span>
+<span class="text-secondary font-bold">12 / 100 GB (12%)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/40">
+<div class="h-full bg-secondary rounded-full transition-all duration-500" style="width: 12%"></div>
+</div>
+</div>
+<!-- Monospace status telemetry table -->
+<div class="p-3 bg-surface-container-low rounded border border-outline-variant/60 font-mono text-[11px] space-y-1.5">
+<div class="flex justify-between text-on-surface-variant">
+<span>Nebius Factory Host:</span>
+<span class="text-on-surface font-semibold">nebius-eu-north-01</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Total Token Budget:</span>
+<span class="text-on-surface font-semibold">1,240,000 / 2,000,000</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Adversarial Attack Latency:</span>
+<span class="text-secondary font-semibold">142ms avg</span>
+</div>
+</div>
+</div>
+<!-- Active API Key & Enclave Fingerprints -->
+<div class="rounded bg-surface-container-lowest border border-outline-variant p-5 space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/60">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">key</span>
+<h3 class="font-headline-md text-[15px] font-semibold text-on-surface tracking-tight">Active API Enclave Credentials</h3>
+</div>
+<button class="font-label-sm text-label-sm text-primary hover:underline font-mono">+ Roll Key</button>
+</div>
+<!-- Key List -->
+<div class="space-y-3 font-mono">
+<div class="p-3 rounded bg-surface-container-low border border-outline-variant/50 flex items-center justify-between">
+<div>
+<div class="text-[11px] font-semibold text-on-surface">REDLINE_PROD_NEBIUS_TOKEN</div>
+<div class="text-[10px] text-on-surface-variant">Created 2d ago • Read/Write/Attest</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-secondary text-[11px]">VALID</span>
+<button class="p-1 text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+</button>
+</div>
+</div>
+<div class="p-3 rounded bg-surface-container-low border border-outline-variant/50 flex items-center justify-between">
+<div>
+<div class="text-[11px] font-semibold text-on-surface">NEMOTRON_ORCHESTRATOR_L1</div>
+<div class="text-[10px] text-on-surface-variant">Created 14d ago • Read Only</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-secondary text-[11px]">VALID</span>
+<button class="p-1 text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Security Callout Box -->
+<div class="p-3 rounded bg-error-container/20 border border-primary-container/40 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-primary-container shrink-0 mt-0.5">security_update_warning</span>
+<div class="text-[11px] leading-relaxed text-on-surface">
+<span class="font-semibold text-primary font-mono uppercase">Enclave Lockdown:</span> All keys are hardware-encrypted within SGX Page Modification Enclaves. Plaintext is never persisted to disk.
+              </div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

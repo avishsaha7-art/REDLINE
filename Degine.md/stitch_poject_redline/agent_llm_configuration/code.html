@@ -1,0 +1,815 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>REDLINE - Agent Models &amp; LLM Configuration</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;900&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-background": "#e5e1e4",
+            "on-tertiary": "#3c0091",
+            "surface-container-low": "#1c1b1d",
+            "on-tertiary-fixed": "#23005c",
+            "secondary-fixed-dim": "#4edea3",
+            "on-tertiary-container": "#340080",
+            "on-primary-container": "#5c0008",
+            "surface-container-high": "#2a2a2c",
+            "tertiary-container": "#a078ff",
+            "on-primary-fixed-variant": "#930013",
+            "tertiary-fixed": "#e9ddff",
+            "surface": "#131315",
+            "primary-container": "#ff5451",
+            "on-secondary": "#003824",
+            "error-container": "#93000a",
+            "secondary": "#4edea3",
+            "surface-container-lowest": "#0e0e10",
+            "surface-tint": "#ffb3ad",
+            "on-surface-variant": "#e4beba",
+            "surface-container": "#201f22",
+            "primary-fixed": "#ffdad7",
+            "surface-dim": "#131315",
+            "secondary-fixed": "#6ffbbe",
+            "on-secondary-container": "#00311f",
+            "primary": "#ffb3ad",
+            "on-surface": "#e5e1e4",
+            "on-secondary-fixed": "#002113",
+            "on-secondary-fixed-variant": "#005236",
+            "on-error": "#690005",
+            "inverse-primary": "#b91a24",
+            "background": "#131315",
+            "surface-bright": "#39393b",
+            "on-primary": "#68000a",
+            "on-error-container": "#ffdad6",
+            "on-tertiary-fixed-variant": "#5516be",
+            "outline-variant": "#5b403e",
+            "secondary-container": "#00a572",
+            "inverse-surface": "#e5e1e4",
+            "tertiary": "#d0bcff",
+            "error": "#ffb4ab",
+            "primary-fixed-dim": "#ffb3ad",
+            "tertiary-fixed-dim": "#d0bcff",
+            "surface-variant": "#353437",
+            "inverse-on-surface": "#313032",
+            "on-primary-fixed": "#410004",
+            "surface-container-highest": "#353437",
+            "outline": "#ab8986"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xl": "1.5rem",
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "gutter-compact": "0.5rem",
+            "space-md": "0.75rem",
+            "space-lg": "1rem",
+            "space-2xl": "2rem",
+            "margin-mobile": "1rem",
+            "margin": "1.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "label-md": ["JetBrains Mono"],
+            "code-lg": ["JetBrains Mono"],
+            "body-sm": ["Geist"],
+            "body-lg": ["Geist"],
+            "body-md": ["Geist"],
+            "code-md": ["JetBrains Mono"],
+            "headline-lg": ["Geist"],
+            "headline-md": ["Geist"],
+            "label-sm": ["JetBrains Mono"],
+            "headline-xl": ["Geist"],
+            "code-sm": ["JetBrains Mono"],
+            "headline-xl-mobile": ["Geist"]
+          },
+          "fontSize": {
+            "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "code-lg": ["13px", { "lineHeight": "20px", "fontWeight": "500" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "body-md": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "code-md": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-md": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "500" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "code-sm": ["11px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "headline-xl-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #0e0e10;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #353437;
+      border-radius: 2px;
+    }
+    .laser-border-glow {
+      box-shadow: 0 0 14px -2px rgba(255, 84, 81, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-hidden font-body-md select-none">
+<div class="flex h-screen w-screen overflow-hidden">
+<!-- SIDE NAVIGATION BAR (SHARED COMPONENT) -->
+<aside class="w-60 flex flex-col justify-between shrink-0 h-screen border-r border-outline-variant bg-surface-container-lowest">
+<!-- Top Section -->
+<div class="flex flex-col p-4 gap-6">
+<!-- Logo / Brand Anchor -->
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded bg-primary-container flex items-center justify-center text-on-primary-container font-headline-lg font-black shadow-inner">
+<svg class="w-5 h-5 fill-current text-white" viewBox="0 0 24 24">
+<path d="M4 4h4.5l6.5 10.5V4H19v16h-4.5L8 9.5V20H4V4z"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-lg text-headline-lg tracking-tight font-black text-on-surface uppercase leading-none">REDLINE</span>
+<span class="bg-surface-container-high text-primary px-1.5 py-0.2 rounded font-label-sm text-label-sm tracking-wider uppercase border border-outline-variant">BETA</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider">Autonomous Security Eng</span>
+</div>
+</div>
+<!-- CTA Action -->
+<button class="w-full bg-primary-container hover:bg-inverse-primary text-white font-label-md text-label-md py-2 px-3 rounded-lg flex items-center justify-between border border-primary-container shadow transition-all active:scale-[0.98]">
+<span class="font-semibold">+ New Task</span>
+<span class="font-label-sm text-label-sm opacity-70">⌘ K</span>
+</button>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-1">
+<!-- Home -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span>Home</span>
+</a>
+<!-- Projects -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+<span>Projects</span>
+</a>
+<!-- Repositories -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="source">source</span>
+<span>Repositories</span>
+</a>
+<!-- Agents (ACTIVE STATE FOR CURRENT SCREEN) -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-container-high text-primary border-l-2 border-primary font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="smart_toy" data-weight="fill" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+<span>Agents</span>
+<span class="ml-auto w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+</a>
+<!-- Sessions -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span>Sessions</span>
+</a>
+<!-- Playground -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="code_blocks">code_blocks</span>
+<span>Playground</span>
+</a>
+<!-- Evidence -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span>Evidence</span>
+</a>
+<!-- Models -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="neurology">neurology</span>
+<span>Models</span>
+</a>
+<!-- Settings -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Footer User Anchor -->
+<div class="p-3 border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center justify-between p-2 rounded hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded bg-tertiary-container text-on-tertiary font-headline-md font-bold flex items-center justify-center text-xs">
+              R
+            </div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface leading-tight">Redline</span>
+<span class="font-label-sm text-label-sm text-outline">Personal Workspace</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="unfold_more">unfold_more</span>
+</div>
+</div>
+</aside>
+<!-- MAIN INTERACTION CANVAS -->
+<div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden bg-background">
+<!-- TOP NAV BAR (SHARED COMPONENT) -->
+<header class="flex justify-between items-center w-full px-6 h-14 bg-surface-container-lowest border-b border-outline-variant shrink-0">
+<!-- Breadcrumb & Pipeline Ethos -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 font-label-sm text-label-sm">
+<span class="text-outline">ORCHESTRATION</span>
+<span class="text-outline-variant">/</span>
+<span class="text-primary font-semibold">AGENTS</span>
+<span class="text-outline-variant">//</span>
+<span class="text-on-surface-variant">CONFIGURATION</span>
+<span class="text-outline-variant">//</span>
+<span class="text-secondary font-mono">LLM_BACKENDS</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<span class="hidden xl:inline text-body-sm font-body-sm text-outline italic">
+            "AI-generated code is guilty until proven safe."
+          </span>
+</div>
+<!-- Trailing System Actions & Statuses -->
+<div class="flex items-center gap-3">
+<!-- Token Factory Status Pill -->
+<div class="flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Nebius Token Factory</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase font-semibold">Connected</span>
+</div>
+<!-- Active Model Dropdown Pill -->
+<div class="flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant">
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-container flex items-center justify-center text-on-secondary text-[8px] font-black">N</div>
+<span class="font-label-sm text-label-sm text-on-surface">NVIDIA Nemotron</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase font-semibold">Active</span>
+<span class="material-symbols-outlined text-outline" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+<!-- Utility Icons -->
+<div class="flex items-center gap-1 pl-1">
+<button class="w-8 h-8 rounded flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="w-8 h-8 rounded flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined" data-icon="splitscreen">splitscreen</span>
+</button>
+</div>
+</div>
+</header>
+<!-- SUB-HEADER TITLE BAR -->
+<div class="px-6 py-4 border-b border-outline-variant bg-surface-container-low/60 flex flex-wrap items-center justify-between gap-4 shrink-0">
+<div>
+<div class="flex items-center gap-3">
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface">Agent LLM Configuration &amp; Model Assignments</h1>
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-primary/10 text-primary border border-primary/25">Fleet v4.8-SGX</span>
+</div>
+<p class="font-body-md text-body-md text-outline mt-0.5">
+            Assign specialized foundational models, fallback engines, quantization tiers, and inference bounds per autonomous agent.
+          </p>
+</div>
+<div class="flex items-center gap-2.5">
+<button class="px-3 py-1.5 rounded border border-outline-variant bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-secondary" data-icon="speed">speed</span>
+<span>Benchmark Fleet Latency</span>
+</button>
+<button class="w-8 h-8 rounded border border-outline-variant bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors" title="Auto-Optimize Allocations">
+<span class="material-symbols-outlined" data-icon="auto_mode">auto_mode</span>
+</button>
+<button class="px-3.5 py-1.5 rounded bg-primary-container hover:bg-inverse-primary text-white font-label-md text-label-md font-semibold flex items-center gap-1.5 shadow transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined" data-icon="save">save</span>
+<span>Save Model Mappings</span>
+</button>
+</div>
+</div>
+<!-- MAIN SCROLLABLE DASHBOARD CANVAS -->
+<main class="flex-1 overflow-y-auto custom-scroll p-6 space-y-6">
+<!-- TELEMETRY RIBBON BANNER -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+<!-- Metric 1: Configured Agents -->
+<div class="p-3.5 rounded border border-outline-variant bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Active Agent Models</span>
+<span class="material-symbols-outlined text-sm" data-icon="group_work">group_work</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">5 / 5</span>
+<span class="font-label-sm text-label-sm text-secondary">All Online</span>
+</div>
+<div class="mt-2 text-label-sm font-label-sm text-outline truncate">
+              Architect, Builder, Red, Repair, Judge
+            </div>
+</div>
+<!-- Metric 2: Primary Engines -->
+<div class="p-3.5 rounded border border-outline-variant bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Primary Inference Engine</span>
+<span class="material-symbols-outlined text-sm" data-icon="memory">memory</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-headline-md text-headline-md font-bold text-on-surface truncate">Nemotron + DeepSeek</span>
+</div>
+<div class="mt-2 flex items-center gap-1.5 text-label-sm font-label-sm text-outline">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>FP8 TensorRT Optimized</span>
+</div>
+</div>
+<!-- Metric 3: Token Velocity -->
+<div class="p-3.5 rounded border border-outline-variant bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Total Fleet Velocity</span>
+<span class="material-symbols-outlined text-sm" data-icon="electric_bolt">electric_bolt</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">3,420 <span class="font-code-sm text-code-sm font-normal text-outline">tok/s</span></span>
+<span class="font-label-sm text-label-sm text-secondary">+12.4%</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded mt-2 overflow-hidden">
+<div class="bg-secondary h-full" style="width: 68%;"></div>
+</div>
+</div>
+<!-- Metric 4: Failover Routing -->
+<div class="p-3.5 rounded border border-outline-variant bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Global Failover</span>
+<span class="material-symbols-outlined text-sm" data-icon="swap_calls">swap_calls</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-headline-lg text-headline-lg font-bold text-secondary">Zero-Downtime</span>
+</div>
+<div class="mt-2 flex items-center gap-1.5 text-label-sm font-label-sm text-outline">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Hot-Swaps Armed (1500ms max)</span>
+</div>
+</div>
+<!-- Metric 5: Cluster Hardware -->
+<div class="p-3.5 rounded border border-outline-variant bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Cluster Acceleration</span>
+<span class="material-symbols-outlined text-sm" data-icon="developer_board">developer_board</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">8x H100 SXM5</span>
+<span class="font-label-sm text-label-sm text-tertiary">SGX PCR0</span>
+</div>
+<div class="mt-2 text-label-sm font-label-sm text-outline truncate">
+              640GB HBM3e Dedicated VRAM
+            </div>
+</div>
+</div>
+<!-- MAIN SPLIT WORKSPACE: AGENT CARDS + GLOBAL POLICIES -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- AGENT MATRIX (LEFT 8 COLS) -->
+<div class="lg:col-span-8 space-y-4">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="tune">tune</span>
+<span class="font-headline-md text-headline-md font-semibold text-on-surface">Agent Inference Fleet Matrix</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Deterministic Lock Enabled</span>
+</div>
+<!-- AGENT 1: ARCHITECT AGENT -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant hover:border-outline transition-colors">
+<div class="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/60 pb-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Architect Agent</span>
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-secondary/10 text-secondary border border-secondary/20">Recon &amp; Topology</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">AST generation, dependency graph resolution, vulnerability attack surface mapping.</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline block">TTFT / Latency</span>
+<span class="font-code-md text-code-md text-secondary font-semibold">24ms <span class="text-outline text-xs font-normal">avg</span></span>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+</div>
+</div>
+<!-- Configuration Rows -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3.5">
+<!-- Primary LLM -->
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Primary LLM</span>
+<div class="flex items-center justify-between">
+<span class="font-code-md text-code-md text-on-surface font-semibold">Nemotron-70B-Instruct</span>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="edit">edit</span>
+</div>
+<span class="font-code-sm text-code-sm text-primary block mt-1">Context: 128k (FP8 TensorRT)</span>
+<span class="font-label-sm text-label-sm text-outline block mt-0.5">NVIDIA Cloud Private SGX</span>
+</div>
+<!-- Fallback LLM -->
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Fallback LLM</span>
+<div class="flex items-center justify-between">
+<span class="font-code-md text-code-md text-on-surface">Claude 3.5 Sonnet</span>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="sync_alt">sync_alt</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline block mt-1">Direct Enclave Proxy</span>
+<span class="font-label-sm text-label-sm text-outline block mt-0.5">Auto-Failover @ 1200ms</span>
+</div>
+<!-- Inference Parameters -->
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Inference Bound</span>
+<div class="flex items-center justify-between text-code-sm font-code-sm">
+<span class="text-outline">Temp: <span class="text-on-surface font-semibold">0.20</span></span>
+<span class="text-outline">Top-P: <span class="text-on-surface font-semibold">0.90</span></span>
+</div>
+<div class="flex items-center justify-between text-code-sm font-code-sm mt-1">
+<span class="text-outline">Max Tokens: <span class="text-on-surface font-semibold">8,192</span></span>
+<span class="text-secondary text-[10px]">Balanced</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AGENT 2: BUILDER AGENT -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant hover:border-outline transition-colors">
+<div class="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/60 pb-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="construction">construction</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Builder Agent</span>
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-primary/10 text-primary border border-primary/20">Deterministic Patch Synthesis</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Syntax validation, idempotency lock synthesis, zero-regression patches.</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline block">TTFT / Latency</span>
+<span class="font-code-md text-code-md text-secondary font-semibold">35ms <span class="text-outline text-xs font-normal">avg</span></span>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3.5">
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Primary LLM</span>
+<div class="flex items-center justify-between">
+<span class="font-code-md text-code-md text-on-surface font-semibold">DeepSeek-Coder-V2-Inst</span>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="edit">edit</span>
+</div>
+<span class="font-code-sm text-code-sm text-primary block mt-1">236B MoE (21B active tokens)</span>
+<span class="font-label-sm text-label-sm text-outline block mt-0.5">Nebius Dedicated Studio</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Fallback LLM</span>
+<div class="flex items-center justify-between">
+<span class="font-code-md text-code-md text-on-surface">Nemotron-340B-Code</span>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="sync_alt">sync_alt</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline block mt-1">High-Precision Hot Reserve</span>
+<span class="font-label-sm text-label-sm text-outline block mt-0.5">Zero Cold-Start</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Inference Bound</span>
+<div class="flex items-center justify-between text-code-sm font-code-sm">
+<span class="text-outline">Temp: <span class="text-on-surface font-semibold">0.10</span></span>
+<span class="text-outline">Top-P: <span class="text-on-surface font-semibold">0.95</span></span>
+</div>
+<div class="flex items-center justify-between text-code-sm font-code-sm mt-1">
+<span class="text-outline">Max Tokens: <span class="text-on-surface font-semibold">16,384</span></span>
+<span class="text-primary text-[10px] font-semibold">Strict Determinism</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AGENT 3: RED TEAM AGENT (CRITICAL ACCENT / CRIMSON LASER GLOW) -->
+<div class="p-4 rounded-lg bg-surface-container-low border-2 border-primary-container laser-border-glow relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/80 pb-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container/20 border border-primary flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Red Team Agent</span>
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-primary text-on-primary font-bold uppercase tracking-wider">Adversarial Fuzzer Swarm</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Race conditions, reentrancy simulations, blind SQLi, token exhaustion attacks.</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline block">TTFT / Latency</span>
+<span class="font-code-md text-code-md text-primary font-bold">18ms <span class="text-outline text-xs font-normal">ultra</span></span>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container animate-ping"></span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3.5">
+<div class="p-2.5 rounded bg-surface-container-high border border-primary/30">
+<span class="font-label-sm text-label-sm text-primary uppercase block mb-1 font-bold">Primary LLM (Fine-Tuned)</span>
+<div class="flex items-center justify-between">
+<span class="font-code-md text-code-md text-on-surface font-bold">Nemotron-70B-Attack-v2</span>
+<span class="material-symbols-outlined text-xs text-primary" data-icon="security">security</span>
+</div>
+<span class="font-code-sm text-code-sm text-error block mt-1">CWE/CVE 0-Day Injection Weights</span>
+<span class="font-label-sm text-label-sm text-outline block mt-0.5">Air-gapped SGX Enclave</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Fallback LLM</span>
+<div class="flex items-center justify-between">
+<span class="font-code-md text-code-md text-on-surface">Llama-3.3-70B-Adv-Quant</span>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="sync_alt">sync_alt</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline block mt-1">Local INT4 Fuzzing Array</span>
+<span class="font-label-sm text-label-sm text-outline block mt-0.5">50 Concurrent Workers</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Inference Bound</span>
+<div class="flex items-center justify-between text-code-sm font-code-sm">
+<span class="text-outline">Temp: <span class="text-primary font-bold">0.85</span></span>
+<span class="text-outline">Top-P: <span class="text-on-surface font-semibold">0.98</span></span>
+</div>
+<div class="flex items-center justify-between text-code-sm font-code-sm mt-1">
+<span class="text-outline">Max Tokens: <span class="text-on-surface font-semibold">4,096</span></span>
+<span class="text-primary text-[10px] font-bold">Aggressive Heuristics</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AGENT 4: REPAIRER AGENT -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant hover:border-outline transition-colors">
+<div class="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/60 pb-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="build_circle">build_circle</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Repairer Agent</span>
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-tertiary/10 text-tertiary border border-tertiary/20">Remediation Engine</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Distributed mutex injection, sanitization wrappers, isolated test compilation.</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline block">TTFT / Latency</span>
+<span class="font-code-md text-code-md text-secondary font-semibold">28ms <span class="text-outline text-xs font-normal">avg</span></span>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3.5">
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Primary LLM</span>
+<div class="flex items-center justify-between">
+<span class="font-code-md text-code-md text-on-surface font-semibold">Qwen-2.5-Coder-32B-Inst</span>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="edit">edit</span>
+</div>
+<span class="font-code-sm text-code-sm text-primary block mt-1">High-Precision AST Hotfix</span>
+<span class="font-label-sm text-label-sm text-outline block mt-0.5">Nebius Hot-Worker Node</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Fallback LLM</span>
+<div class="flex items-center justify-between">
+<span class="font-code-md text-code-md text-on-surface">Nemotron-70B-Instruct</span>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="sync_alt">sync_alt</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline block mt-1">Secondary Remediation Pool</span>
+<span class="font-label-sm text-label-sm text-outline block mt-0.5">Instant Hot Failover</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Inference Bound</span>
+<div class="flex items-center justify-between text-code-sm font-code-sm">
+<span class="text-outline">Temp: <span class="text-on-surface font-semibold">0.15</span></span>
+<span class="text-outline">Top-P: <span class="text-on-surface font-semibold">0.88</span></span>
+</div>
+<div class="flex items-center justify-between text-code-sm font-code-sm mt-1">
+<span class="text-outline">Max Tokens: <span class="text-on-surface font-semibold">8,192</span></span>
+<span class="text-secondary text-[10px]">Deterministic Patch</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AGENT 5: JUDGE AGENT -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant hover:border-outline transition-colors">
+<div class="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/60 pb-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Judge Agent</span>
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-secondary/10 text-secondary border border-secondary/20">Cryptographic Verification</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Bytecode receipts, zero-knowledge proofs, SHA-256 code merkle attestation.</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline block">TTFT / Latency</span>
+<span class="font-code-md text-code-md text-secondary font-semibold">12ms <span class="text-outline text-xs font-normal">sealed</span></span>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3.5">
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Primary LLM / Engine</span>
+<div class="flex items-center justify-between">
+<span class="font-code-md text-code-md text-on-surface font-semibold">Nemotron-70B-Reward + Rules</span>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="lock">lock</span>
+</div>
+<span class="font-code-sm text-code-sm text-secondary block mt-1">Deterministic Critic &amp; Verifier</span>
+<span class="font-label-sm text-label-sm text-outline block mt-0.5">PCR0 Sealed SGX Enclave</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Fallback LLM</span>
+<div class="flex items-center justify-between">
+<span class="font-code-md text-code-md text-on-surface">Static AST Proof Engine</span>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="sync_alt">sync_alt</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline block mt-1">Non-Stochastic Binary Parser</span>
+<span class="font-label-sm text-label-sm text-outline block mt-0.5">100% Deterministic Safe</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Inference Bound</span>
+<div class="flex items-center justify-between text-code-sm font-code-sm">
+<span class="text-outline">Temp: <span class="text-secondary font-bold">0.00</span></span>
+<span class="text-outline">Top-P: <span class="text-on-surface font-semibold">1.00</span></span>
+</div>
+<div class="flex items-center justify-between text-code-sm font-code-sm mt-1">
+<span class="text-outline">Max Tokens: <span class="text-on-surface font-semibold">4,096</span></span>
+<span class="text-secondary text-[10px]">Zero Drift Lock</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- GLOBAL ROUTER, FAILOVER & SECURITY POLICIES (RIGHT 4 COLS) -->
+<div class="lg:col-span-4 space-y-4">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="shield_with_heart">shield_with_heart</span>
+<span class="font-headline-md text-headline-md font-semibold text-on-surface">Router &amp; Hardware Enclave</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">SGX ACTIVE</span>
+</div>
+<!-- Automatic Failover Policies Card -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant space-y-3.5">
+<span class="font-label-md text-label-md uppercase tracking-wider text-outline block">Failover &amp; Latency Gateways</span>
+<div class="space-y-2.5">
+<div class="flex items-center justify-between p-2 rounded bg-surface-container border border-outline-variant/40">
+<div>
+<span class="font-body-md text-body-md text-on-surface block font-medium">Automatic Latency Trip</span>
+<span class="font-label-sm text-label-sm text-outline">Hot swap if P99 TTFT &gt; 1,500ms</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-8 h-4 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3.5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-surface-container border border-outline-variant/40">
+<div>
+<span class="font-body-md text-body-md text-on-surface block font-medium">5xx Fast Recovery</span>
+<span class="font-label-sm text-label-sm text-outline">Reroute token requests on 2 retries</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-8 h-4 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3.5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-surface-container border border-outline-variant/40">
+<div>
+<span class="font-body-md text-body-md text-on-surface block font-medium">Adversarial Quarantine</span>
+<span class="font-label-sm text-label-sm text-outline">Isolate Red Team token context</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-8 h-4 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3.5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</div>
+<!-- Quantization Precision Tier -->
+<div class="pt-2 border-t border-outline-variant/40">
+<span class="font-label-sm text-label-sm text-outline block mb-2">Quantization &amp; Weights Precision</span>
+<div class="grid grid-cols-3 gap-1.5 font-label-sm text-label-sm">
+<button class="py-1.5 px-2 rounded bg-surface-container-high text-primary border border-primary/50 text-center font-bold">FP8 TensorRT</button>
+<button class="py-1.5 px-2 rounded bg-surface-container hover:bg-surface-container-high text-outline text-center transition-colors">BF16 Native</button>
+<button class="py-1.5 px-2 rounded bg-surface-container hover:bg-surface-container-high text-outline text-center transition-colors">INT4 Quant</button>
+</div>
+</div>
+</div>
+<!-- Token Budget & Quota Allocation -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-outline">Fleet Token Quotas (Monthly)</span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">18.4M / 50M</span>
+</div>
+<div class="space-y-2 font-label-sm text-label-sm">
+<div>
+<div class="flex justify-between text-outline mb-1">
+<span>Red Team Agent (Adversarial Swarm)</span>
+<span class="text-primary font-code-sm">45% (8.2M)</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded overflow-hidden">
+<div class="bg-primary-container h-full" style="width: 45%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-outline mb-1">
+<span>Builder Agent (Patch Synthesis)</span>
+<span class="text-secondary font-code-sm">28% (5.1M)</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded overflow-hidden">
+<div class="bg-secondary h-full" style="width: 28%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-outline mb-1">
+<span>Architect Agent (Code Mapping)</span>
+<span class="text-tertiary font-code-sm">15% (2.7M)</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded overflow-hidden">
+<div class="bg-tertiary-container h-full" style="width: 15%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-outline mb-1">
+<span>Repairer + Judge Agents</span>
+<span class="text-on-surface font-code-sm">12% (2.4M)</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded overflow-hidden">
+<div class="bg-surface-bright h-full" style="width: 12%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Hardware Security & PCR0 Enclave Card -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant space-y-2.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-outline">Enclave Attestation</span>
+<span class="px-1.5 py-0.5 rounded text-[9px] font-label-sm bg-secondary/10 text-secondary border border-secondary/20">PCR0 VERIFIED</span>
+</div>
+<div class="p-2 rounded bg-surface-container font-code-sm text-code-sm text-outline border border-outline-variant/40 space-y-1">
+<div class="flex justify-between">
+<span>Enclave ID:</span>
+<span class="text-on-surface">sgx_nebius_pcr0_8820f</span>
+</div>
+<div class="flex justify-between">
+<span>Zero-Egress:</span>
+<span class="text-secondary font-semibold">Strict Air-Gap</span>
+</div>
+<div class="flex justify-between">
+<span>Merkle Code Root:</span>
+<span class="text-on-surface truncate max-w-[140px]">3f2a81c1...9e44b</span>
+</div>
+</div>
+<button class="w-full py-1.5 px-3 rounded border border-outline-variant bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-xs" data-icon="policy">policy</span>
+<span>Audit Enclave Cryptographic Proof</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BOTTOM TELEMETRY STATUS DOCK (FIXED TELEMETRY PLANE) -->
+<footer class="h-9 px-6 bg-surface-container-lowest border-t border-outline-variant flex items-center justify-between text-code-sm font-code-sm text-outline shrink-0">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-on-surface">Nebius SGX Cluster: Online</span>
+</div>
+<span class="text-outline-variant">|</span>
+<div>Total Active VRAM: <span class="text-on-surface font-semibold">412 / 640 GB</span></div>
+<span class="text-outline-variant">|</span>
+<div class="hidden sm:block">Model Sync Status: <span class="text-secondary font-semibold">Synchronized (0 drifts)</span></div>
+</div>
+<div class="flex items-center gap-3">
+<span class="hidden md:inline font-label-sm text-label-sm text-outline">REDLINE ENGINE v2.4.19</span>
+<span class="material-symbols-outlined text-sm text-outline" data-icon="terminal">terminal</span>
+</div>
+</footer>
+</div>
+</div>
+</body></html>
