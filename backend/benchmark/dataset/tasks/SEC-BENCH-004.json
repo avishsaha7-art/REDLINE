@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-004",
+  "dataset_version": "1.0.0",
+  "category": "AUTH_BYPASS",
+  "severity": "CRITICAL",
+  "title": "JWT 'none' Algorithm Authentication Bypass",
+  "description": "Authentication token verification routine accepts unverified tokens when header specifies alg: none.",
+  "cwe_id": "CWE-287",
+  "repository_fixture": "fixtures/SEC-BENCH-004",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "Only cryptographic HMAC-SHA256 signatures with matching secret are accepted; alg 'none' must be rejected.",
+  "expected_vulnerable_behavior": "Tokens with \"alg\": \"none\" and empty signature bypass verification and authenticate as admin.",
+  "required_secure_behavior": "Tokens with \"alg\": \"none\" raise PermissionError; only authentic HS256 tokens pass verification.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-004/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-004/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-004/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-004/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "Standalone standard library JWT verification."
+  }
+}

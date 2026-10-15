@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-010",
+  "dataset_version": "1.0.0",
+  "category": "UNBOUNDED_PAGINATION",
+  "severity": "MEDIUM",
+  "title": "Unbounded Pagination Resource Exhaustion",
+  "description": "Event feed query honors client-requested limit without maximum page ceiling.",
+  "cwe_id": "CWE-770",
+  "repository_fixture": "fixtures/SEC-BENCH-010",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "Page limits must be capped at a secure maximum ceiling (max 100 items).",
+  "expected_vulnerable_behavior": "Request with limit=500 returns 500 items.",
+  "required_secure_behavior": "Request with limit=500 is clamped to at most 100 items.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-010/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-010/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-010/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-010/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "Tested with synthetic in-memory slice."
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-003",
+  "dataset_version": "1.0.0",
+  "category": "RACE_CONDITION",
+  "severity": "HIGH",
+  "title": "Concurrent Balance Overdraft in Wallet Ledger",
+  "description": "Wallet debit routine exhibits check-then-act race window without thread synchronization.",
+  "cwe_id": "CWE-362",
+  "repository_fixture": "fixtures/SEC-BENCH-003",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "Balance must never drop below zero; concurrent withdrawal operations must be atomic.",
+  "expected_vulnerable_behavior": "Two concurrent threads withdrawing 80 from a balance of 100 both succeed, resulting in negative balance (-60).",
+  "required_secure_behavior": "Synchronization ensures exactly one concurrent withdrawal succeeds and balance remains non-negative (20).",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-003/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-003/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-003/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-003/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "Tested with Python threading in single-process memory model."
+  }
+}

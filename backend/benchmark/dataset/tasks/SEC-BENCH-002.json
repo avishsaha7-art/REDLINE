@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-002",
+  "dataset_version": "1.0.0",
+  "category": "PATH_TRAVERSAL",
+  "severity": "HIGH",
+  "title": "Path Traversal in File Vault Storage",
+  "description": "Document storage component joins unvalidated relative path sequences allowing access outside workspace.",
+  "cwe_id": "CWE-22",
+  "repository_fixture": "fixtures/SEC-BENCH-002",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "Target file path must resolve strictly within the designated base directory boundary.",
+  "expected_vulnerable_behavior": "Requesting relative path '../secret.key' escapes the base directory and reads external file.",
+  "required_secure_behavior": "Relative path escaping base directory raises ValueError or PermissionError; valid workspace files succeed.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-002/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-002/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-002/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-002/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "Tested on local filesystem; symlink handling adheres to os.path.realpath resolution."
+  }
+}

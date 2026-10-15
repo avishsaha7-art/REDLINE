@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-009",
+  "dataset_version": "1.0.0",
+  "category": "DUPLICATE_TRANSACTION",
+  "severity": "HIGH",
+  "title": "Non-Idempotent Financial Credit Webhook",
+  "description": "Payment ingestion handler processes credits without recording or checking idempotency keys.",
+  "cwe_id": "CWE-799",
+  "repository_fixture": "fixtures/SEC-BENCH-009",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "Transaction processing must be idempotent; duplicate event IDs must not re-credit balance.",
+  "expected_vulnerable_behavior": "Replaying the same event_id credits the user balance multiple times.",
+  "required_secure_behavior": "Replayed event_id returns cached result and does not modify user balance.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-009/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-009/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-009/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-009/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "Tested with memory idempotency cache."
+  }
+}

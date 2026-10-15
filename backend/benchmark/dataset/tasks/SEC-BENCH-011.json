@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-011",
+  "dataset_version": "1.0.0",
+  "category": "PRIVILEGE_ESCALATION",
+  "severity": "HIGH",
+  "title": "Default-Allow Role-Based Access Control Defect",
+  "description": "RBAC permission check defaults to allowing actions for unknown or empty role names.",
+  "cwe_id": "CWE-276",
+  "repository_fixture": "fixtures/SEC-BENCH-011",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "Authorization must be fail-closed (default-deny); only explicitly authorized roles are granted access.",
+  "expected_vulnerable_behavior": "Unknown role 'UNTRUSTED_EXTERNAL' is granted permission for sensitive action.",
+  "required_secure_behavior": "Unknown role 'UNTRUSTED_EXTERNAL' returns False for sensitive action.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-011/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-011/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-011/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-011/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "Tested with in-memory role permission map."
+  }
+}

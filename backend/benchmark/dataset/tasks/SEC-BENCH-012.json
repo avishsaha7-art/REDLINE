@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-012",
+  "dataset_version": "1.0.0",
+  "category": "SECRET_LEAKAGE",
+  "severity": "HIGH",
+  "title": "Sensitive Token Leakage in Webhook Error Dumps",
+  "description": "Error reporting handler reflects raw HTTP request headers containing Authorization and API keys in response dict.",
+  "cwe_id": "CWE-532",
+  "repository_fixture": "fixtures/SEC-BENCH-012",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "Sensitive request headers (Authorization, X-Api-Key) must be redacted in error dictionaries and logs.",
+  "expected_vulnerable_behavior": "Error response returns unredacted Bearer tokens and API keys.",
+  "required_secure_behavior": "Error response redacts sensitive headers while preserving non-sensitive headers.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-012/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-012/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-012/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-012/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "Tested with case-insensitive header key redaction."
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-005",
+  "dataset_version": "1.0.0",
+  "category": "AUTHORIZATION",
+  "severity": "HIGH",
+  "title": "Insecure Direct Object Reference (IDOR) in Document Service",
+  "description": "Document fetch endpoint returns documents by identifier without checking owner permissions.",
+  "cwe_id": "CWE-639",
+  "repository_fixture": "fixtures/SEC-BENCH-005",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "Callers may only access documents they own or have been explicitly granted permission to view.",
+  "expected_vulnerable_behavior": "Caller 'bob' fetches 'doc-101' owned by 'alice' and receives full document payload.",
+  "required_secure_behavior": "Caller 'bob' attempting to fetch 'doc-101' owned by 'alice' raises PermissionError.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-005/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-005/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-005/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-005/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "In-memory document store model."
+  }
+}

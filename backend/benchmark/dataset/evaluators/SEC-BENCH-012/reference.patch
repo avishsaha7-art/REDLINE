@@ -1,0 +1,14 @@
+--- a/app.py
++++ b/app.py
+@@ -3,6 +3,9 @@
+     if "error" in endpoint:
+-        # VULNERABILITY: Dumps raw request headers into error dictionary
++        SENSITIVE = {"authorization", "x-api-key", "token", "secret"}
++        sanitized = {k: ("[REDACTED]" if k.lower() in SENSITIVE else v) for k, v in headers.items()}
+         return {
+             "status": "FAILED",
+             "debug_info": {
+                 "endpoint": endpoint,
+-                "headers": headers
++                "headers": sanitized
+             }

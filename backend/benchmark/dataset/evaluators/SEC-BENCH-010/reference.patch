@@ -1,0 +1,8 @@
+--- a/app.py
++++ b/app.py
+@@ -5,3 +5,4 @@
+     def get_events(self, limit: int, offset: int = 0) -> list[str]:
+-        # VULNERABILITY: Unbounded limit parameter allows requesting excessive items
++        MAX_PAGE_SIZE = 100
++        limit = max(1, min(int(limit), MAX_PAGE_SIZE))
+         return self._events[offset : offset + limit]

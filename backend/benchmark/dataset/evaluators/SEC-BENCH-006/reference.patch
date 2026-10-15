@@ -1,0 +1,7 @@
+--- a/app.py
++++ b/app.py
+@@ -14,3 +14,4 @@
+     def revoke_authorization(self, user_id: str):
+-        # VULNERABILITY: Updates database but fails to invalidate cache
+         self._db_permissions[user_id] = False
++        self._cache.pop(user_id, None)

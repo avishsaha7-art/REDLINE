@@ -1,0 +1,9 @@
+--- a/app.py
++++ b/app.py
+@@ -10,3 +10,4 @@
+         if not doc:
+             raise KeyError("Document not found")
+-        # VULNERABILITY: Missing owner check; returns any document if doc_id is known
++        if doc.get("owner_id") != caller_id:
++            raise PermissionError("Access denied: caller is not the owner")
+         return doc

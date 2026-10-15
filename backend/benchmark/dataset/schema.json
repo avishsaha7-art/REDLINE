@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "REDLINESecurityBenchmarkTask",
+  "description": "Schema for frozen security benchmark tasks in the REDLINE platform.",
+  "type": "object",
+  "required": [
+    "task_id",
+    "dataset_version",
+    "category",
+    "severity",
+    "title",
+    "description",
+    "cwe_id",
+    "repository_fixture",
+    "target_file",
+    "allowed_scope",
+    "security_invariant",
+    "expected_vulnerable_behavior",
+    "required_secure_behavior",
+    "candidate_visible_tests",
+    "evaluator_tests",
+    "reference_patch",
+    "provenance"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^SEC-BENCH-[0-9]{3}$"
+    },
+    "dataset_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "SQL_INJECTION",
+        "PATH_TRAVERSAL",
+        "RACE_CONDITION",
+        "AUTH_BYPASS",
+        "AUTHORIZATION",
+        "CACHE_INVALIDATION",
+        "RESOURCE_LEAK",
+        "COMMAND_INJECTION",
+        "DUPLICATE_TRANSACTION",
+        "UNBOUNDED_PAGINATION",
+        "PRIVILEGE_ESCALATION",
+        "SECRET_LEAKAGE"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "cwe_id": {
+      "type": "string",
+      "pattern": "^CWE-[0-9]+$"
+    },
+    "repository_fixture": {
+      "type": "string"
+    },
+    "target_file": {
+      "type": "string"
+    },
+    "allowed_scope": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "security_invariant": {
+      "type": "string"
+    },
+    "expected_vulnerable_behavior": {
+      "type": "string"
+    },
+    "required_secure_behavior": {
+      "type": "string"
+    },
+    "candidate_visible_tests": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "evaluator_tests": {
+      "type": "object",
+      "required": ["vulnerability_test", "secure_acceptance_test"],
+      "properties": {
+        "vulnerability_test": { "type": "string" },
+        "secure_acceptance_test": { "type": "string" }
+      }
+    },
+    "reference_patch": {
+      "type": "string"
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["author", "review_status", "limitations"],
+      "properties": {
+        "author": { "type": "string" },
+        "review_status": { "type": "string" },
+        "limitations": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-007",
+  "dataset_version": "1.0.0",
+  "category": "RESOURCE_LEAK",
+  "severity": "MEDIUM",
+  "title": "Unclosed File Descriptor Leak in Log Streamer",
+  "description": "Log stream processor opens files without context manager or cleanup on error branches.",
+  "cwe_id": "CWE-400",
+  "repository_fixture": "fixtures/SEC-BENCH-007",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "File descriptors must be cleanly closed even when lines fail parsing or trigger early returns.",
+  "expected_vulnerable_behavior": "Encountering error records skips file handle closure, leaking open descriptor.",
+  "required_secure_behavior": "Context manager guarantees deterministic closure of all open file descriptors.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-007/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-007/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-007/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-007/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "Tested using handle closed status tracking on log stream processor."
+  }
+}

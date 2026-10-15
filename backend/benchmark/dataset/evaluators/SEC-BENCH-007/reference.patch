@@ -1,0 +1,21 @@
+--- a/app.py
++++ b/app.py
+@@ -5,9 +5,8 @@
+     def process_logs(self, file_paths: list[str]) -> list[str]:
+         results = []
+         for path in file_paths:
+-            # VULNERABILITY: Opens file without context manager or close() in error path
+-            handle = open(path, "r", encoding="utf-8")
+-            self.allocated_handles.append(handle)
+-            line = handle.readline()
+-            if "INVALID" in line:
+-                continue
+-            results.append(line.strip())
+-            handle.close()
++            with open(path, "r", encoding="utf-8") as handle:
++                self.allocated_handles.append(handle)
++                line = handle.readline()
++                if "INVALID" in line:
++                    continue
++                results.append(line.strip())
+         return results

@@ -1,0 +1,212 @@
+{
+  "dataset_name": "REDLINE-Held-Out-Security-Benchmark",
+  "dataset_version": "1.0.0",
+  "task_count": 12,
+  "description": "Frozen 12-task security benchmark dataset for autonomous vulnerability repair & verification evaluation.",
+  "tasks": [
+    {
+      "task_id": "SEC-BENCH-001",
+      "category": "SQL_INJECTION",
+      "severity": "CRITICAL",
+      "cwe_id": "CWE-89",
+      "title": "SQL Injection in User Search Portal",
+      "spec_file": "tasks/SEC-BENCH-001.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-001/app.py": "17f731f4e86408f19452c01381e769ffd205bb0a996d8eedd1c263e5cadf9aa2",
+        "fixtures/SEC-BENCH-001/test_public.py": "6f052e1821bd5c342edebac9d36471e67d2c7b5630f54aae51841e5774f808d3",
+        "evaluators/SEC-BENCH-001/test_vulnerability.py": "467b5bfc98ab3a870e45d8d47a61427e9dddea11c3239d959aea11c91c4a5e18",
+        "evaluators/SEC-BENCH-001/test_secure.py": "4fe60c26320fbaa8de2a2be9d956332cd2617d8eb42c5d72cf328c02b7263898",
+        "evaluators/SEC-BENCH-001/reference.patch": "88569714325c6fe1ead9d2553ce9a45582f85565bc2ecc7082f494d9a60c7f8d",
+        "evaluators/SEC-BENCH-001/fixed_app.py": "fa5dfae1b1b85a7f27e11234e66de3ab61515e53287d490ce9615d71e566b961",
+        "tasks/SEC-BENCH-001.json": "0aa3e8b74c2a1a1764d6a0cebf1c66f36a274afaa0dd2e7f0d8960c6df6cd782"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-002",
+      "category": "PATH_TRAVERSAL",
+      "severity": "HIGH",
+      "cwe_id": "CWE-22",
+      "title": "Path Traversal in File Vault Storage",
+      "spec_file": "tasks/SEC-BENCH-002.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-002/app.py": "8e0349295c3bc3c654bdcae905352c2dd9c36324193c385b82a9bc4ea6ea2146",
+        "fixtures/SEC-BENCH-002/test_public.py": "bd23da7c985586f0910a32f1819c6866062d60cb1ec16615ea76139c34b5dc17",
+        "evaluators/SEC-BENCH-002/test_vulnerability.py": "fa741c9b7bf942d95c2a64b18e1d08f38d9c8b22a4ad59fbf5dfbaa27bc3af13",
+        "evaluators/SEC-BENCH-002/test_secure.py": "d7d3b75c42e58f370dc82b80eff6272ebf0dbeadf6b8b242008ce53d64fdd004",
+        "evaluators/SEC-BENCH-002/reference.patch": "4835c3b95d090a8e5cf1c832d1681115849beb6231dae4109c2593fed36d1df1",
+        "evaluators/SEC-BENCH-002/fixed_app.py": "84e359d65672b44efe22f644c82a89ca71a230761cc7a94f9b33e121b923a9b5",
+        "tasks/SEC-BENCH-002.json": "faf2de6c5cc307233fea20e88735a6e2a827d43141e26c93260e0c229a8ce342"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-003",
+      "category": "RACE_CONDITION",
+      "severity": "HIGH",
+      "cwe_id": "CWE-362",
+      "title": "Concurrent Balance Overdraft in Wallet Ledger",
+      "spec_file": "tasks/SEC-BENCH-003.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-003/app.py": "6cd75be445f6722fd520cf6faf6daadba8b8bcf0d8053c6e4f7a6f5e66f568c9",
+        "fixtures/SEC-BENCH-003/test_public.py": "0869e98e5c163177d7fe6323c3fe1d82414d3b990bc452767f56da4da06bd9ba",
+        "evaluators/SEC-BENCH-003/test_vulnerability.py": "b4cc6c5e3b9187698e02b470f5e85fc485d1df307ea2dab893a72af6104bb03b",
+        "evaluators/SEC-BENCH-003/test_secure.py": "e95bca0633bc86bba183a11b56504a340aeaaba3ecdedd640204821c3314d621",
+        "evaluators/SEC-BENCH-003/reference.patch": "2818f735f79bbd3c2720be0b2316c78233edc97a4d200dcbc03c9fd98fe41d67",
+        "evaluators/SEC-BENCH-003/fixed_app.py": "1bb2869a4c9441d47596c88b198c012fc2a7855d61c64df4eb1dfdccd424b1a5",
+        "tasks/SEC-BENCH-003.json": "2cfdded0b071a526945594d5259e7dc967154d14d232df382205a913b0bc6690"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-004",
+      "category": "AUTH_BYPASS",
+      "severity": "CRITICAL",
+      "cwe_id": "CWE-287",
+      "title": "JWT 'none' Algorithm Authentication Bypass",
+      "spec_file": "tasks/SEC-BENCH-004.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-004/app.py": "c607f36c075f741d08169689a93599d456f9881ab46f82dc44ffd2e7393a9c0d",
+        "fixtures/SEC-BENCH-004/test_public.py": "9d3754ee8f083b07c6d3e95a8fd381f7ba7b9e05adeed17a538aef4fdf0e3f2d",
+        "evaluators/SEC-BENCH-004/test_vulnerability.py": "79eaadf9ac05a768b3e20f2b1ba252812abbaa1c71798a7a065c7fe4623c6f91",
+        "evaluators/SEC-BENCH-004/test_secure.py": "f9f6e83d8faab368d63577a09f34119b012dfd64de29f938c22293579c4045f6",
+        "evaluators/SEC-BENCH-004/reference.patch": "a47f821feedc41950b55312eea6a741b5d8d393ecb9f00f440eb9a7c8982e5f8",
+        "evaluators/SEC-BENCH-004/fixed_app.py": "9fe24b95dabd722f1bec66ea5c06c6ffb96a5ad33c677dcb6d3aa4b0bca2c907",
+        "tasks/SEC-BENCH-004.json": "b81abe9e5e23ea28a5aef30b3e0a5ecd35d5d46f94f36d646082b6de7d775813"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-005",
+      "category": "AUTHORIZATION",
+      "severity": "HIGH",
+      "cwe_id": "CWE-639",
+      "title": "Insecure Direct Object Reference (IDOR) in Document Service",
+      "spec_file": "tasks/SEC-BENCH-005.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-005/app.py": "152c27d12c882c3d3fe332416c0190d6ecc7119b80c366ce9338eb7c1a9b5490",
+        "fixtures/SEC-BENCH-005/test_public.py": "79cbedebc20675ba12b7ac27dfbdb4f135233bf96ceb866cc15422479d98e2ab",
+        "evaluators/SEC-BENCH-005/test_vulnerability.py": "52531b1048d81f7b5a5853790badc859e554d8d8df46d9ba62c259dc4e41404c",
+        "evaluators/SEC-BENCH-005/test_secure.py": "b349c76ed6ab56d2c7f7d382f6418288626129251b1a1bbff4bc983a6c59feec",
+        "evaluators/SEC-BENCH-005/reference.patch": "c76d97939ae2aca6e22e4bd41668e29c96313a087efc7b59cb07e8b794c56d58",
+        "evaluators/SEC-BENCH-005/fixed_app.py": "acaafc015a56bb3b63bd26615842ff6b10c98b74fa044762a95ce495cad9296d",
+        "tasks/SEC-BENCH-005.json": "cbfd6d2e5bcd9baa1867bd85488d32a8186b2cbcb452a99877defd0e855f8a6d"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-006",
+      "category": "CACHE_INVALIDATION",
+      "severity": "HIGH",
+      "cwe_id": "CWE-300",
+      "title": "Stale Authorization State in Permission Cache",
+      "spec_file": "tasks/SEC-BENCH-006.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-006/app.py": "6de70857ea95859c75020d522bf035d9b99591c76474e3d393d4b1f21bdd8770",
+        "fixtures/SEC-BENCH-006/test_public.py": "64af1f2456d0aecec3921ddb592acf76c2cecfa4a35f1a58b4d4008cbf3d938b",
+        "evaluators/SEC-BENCH-006/test_vulnerability.py": "178ed9674a851313747d079d67c78f70622209d60b4e985278f3e34318d76712",
+        "evaluators/SEC-BENCH-006/test_secure.py": "6b0c837286ca26215441ba6cb07ee6858824ade79f34a55533ee700a351f81b0",
+        "evaluators/SEC-BENCH-006/reference.patch": "e7d2c8c061640a6a5b702825635b2e3d5922862020da9ecd3ebc1f205c221d49",
+        "evaluators/SEC-BENCH-006/fixed_app.py": "8abc52e93e2c21694fa951b66ad366e6599d9f7737b8bbb92ec66f210e0092c2",
+        "tasks/SEC-BENCH-006.json": "7382c3989812c645672eba2cbb571cf4303a981b4a4ade907a40553e13621236"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-007",
+      "category": "RESOURCE_LEAK",
+      "severity": "MEDIUM",
+      "cwe_id": "CWE-400",
+      "title": "Unclosed File Descriptor Leak in Log Streamer",
+      "spec_file": "tasks/SEC-BENCH-007.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-007/app.py": "40fd883bb57acc67cbe8cd6fa2269a85ed9037a9de73731ea2212d5e501cc5a5",
+        "fixtures/SEC-BENCH-007/test_public.py": "44487ef4d64de55a36a7f823cf9056d9108dd98f7f8e3c9273b371bb634e2fd9",
+        "evaluators/SEC-BENCH-007/test_vulnerability.py": "3f8dd1e118b1dcbb04bf65c1c860b6f9526fabaa23c82ffa6b8eed98ba38f423",
+        "evaluators/SEC-BENCH-007/test_secure.py": "78cb85196a261ee71b5e4e13e879ba33497f93eecd24a4cfdfb13c3ac58abfad",
+        "evaluators/SEC-BENCH-007/reference.patch": "52a66684f28e05de4a5b0a101dd7f921c4e0161c73e6305f66d30a77dff4e9a0",
+        "evaluators/SEC-BENCH-007/fixed_app.py": "214d64a440446f94d63be97e333d4ecb47a470bf46b7899102f95fbea6b7179c",
+        "tasks/SEC-BENCH-007.json": "28299c724ceedf4a3a6720c8ef5512aa4a04242f699dd1c88b3718b3956ff52a"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-008",
+      "category": "COMMAND_INJECTION",
+      "severity": "CRITICAL",
+      "cwe_id": "CWE-78",
+      "title": "Command Injection in Diagnostic Ping Utility",
+      "spec_file": "tasks/SEC-BENCH-008.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-008/app.py": "786ec46c0d80cc3c7b468663c5242fee1ff21de5f2a94e82718c1a4108dc88c4",
+        "fixtures/SEC-BENCH-008/test_public.py": "3b16c10fabaf479b1b9bb947af8754af25c7940bf6b3dd5a3eebfd0c990bca2c",
+        "evaluators/SEC-BENCH-008/test_vulnerability.py": "8ae5383c5377aae2d2d68e600ae504cd96c0469bb45d2ef892087a55e526f3f7",
+        "evaluators/SEC-BENCH-008/test_secure.py": "69b711835c07cf4c73eea25295f3e0419258d3500970327c8fcbc251b227db58",
+        "evaluators/SEC-BENCH-008/reference.patch": "3ccf43b9e748f75bfdb878e460caffd92265c5328a1036f1a653a1a148b04560",
+        "evaluators/SEC-BENCH-008/fixed_app.py": "ff1a9c9d1d6ed97762a89cdeea515679f696844022507e123b60648869b9b7b6",
+        "tasks/SEC-BENCH-008.json": "e494d4a24321e61240c7fcdc586bbb32fa4ffcd7e4a04e0928b37027be14dfe9"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-009",
+      "category": "DUPLICATE_TRANSACTION",
+      "severity": "HIGH",
+      "cwe_id": "CWE-799",
+      "title": "Non-Idempotent Financial Credit Webhook",
+      "spec_file": "tasks/SEC-BENCH-009.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-009/app.py": "83270e7ccecb0e5c5e37f900acd4efb7a20e5f6c7bfc8b027e8941e607b26720",
+        "fixtures/SEC-BENCH-009/test_public.py": "8fe8daddc38175216602fa9a327256c5bf143515981899f77ce9029ad216a3b2",
+        "evaluators/SEC-BENCH-009/test_vulnerability.py": "f2a0365f0afc33906aca3b06fb2d2daa0500df2a82d81275d575278f5bde05a7",
+        "evaluators/SEC-BENCH-009/test_secure.py": "50da34947ec55df378925268ae9edfaa5813b0d6ef0ee51127878a962b2f6ccf",
+        "evaluators/SEC-BENCH-009/reference.patch": "55fe2f39e0be43ecfd63fa83fa12f6c14d08b31dcf4df5ae1803ac161d4eda5d",
+        "evaluators/SEC-BENCH-009/fixed_app.py": "2fc0dbea95cd1749fb771e1fec16547a3f89bf59ad74c923dc4a71ed7b2c0b12",
+        "tasks/SEC-BENCH-009.json": "ac188b8f95f988ea7e0429db7a47beda5fbb43dcc5e35e2aa5b38bc27f79c071"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-010",
+      "category": "UNBOUNDED_PAGINATION",
+      "severity": "MEDIUM",
+      "cwe_id": "CWE-770",
+      "title": "Unbounded Pagination Resource Exhaustion",
+      "spec_file": "tasks/SEC-BENCH-010.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-010/app.py": "8c82e983a81cd6c824aed8970fad1a332eb472dbdcb5758e60d818a00d05f694",
+        "fixtures/SEC-BENCH-010/test_public.py": "adfa51c5860a873dc0b63b58f0bbf0dacc2f255ed3d67fd0defb7df9448dc230",
+        "evaluators/SEC-BENCH-010/test_vulnerability.py": "c0686542c2add3092aac15c3fae7ae168ddfef9963d469e0cf545268d7a194d4",
+        "evaluators/SEC-BENCH-010/test_secure.py": "a52124847dca3790a977047ae5f1cffaf0ab26f1889fb65b029a23d43d8d5ce9",
+        "evaluators/SEC-BENCH-010/reference.patch": "b295a8cf1179e914153ac8c2fbd0882f66d303608c633395e404baa299ba7175",
+        "evaluators/SEC-BENCH-010/fixed_app.py": "d9db7f8408d5f8f9e0ffc9d79bdc2d692e028b156ec8b9676740fc6b5d348c51",
+        "tasks/SEC-BENCH-010.json": "318ece5030757abbd7fd39d59befcab8efb8c9432492aecb96249cd5919e16fc"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-011",
+      "category": "PRIVILEGE_ESCALATION",
+      "severity": "HIGH",
+      "cwe_id": "CWE-276",
+      "title": "Default-Allow Role-Based Access Control Defect",
+      "spec_file": "tasks/SEC-BENCH-011.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-011/app.py": "17123b7fbef3288629cab86b71bc7af4e29ab96afc98ec77b17ab031fafbc2f5",
+        "fixtures/SEC-BENCH-011/test_public.py": "1f5a17d0395d1700d18c5910d4bb2eb136effe6c40e26993e2fc75f8f22e42d5",
+        "evaluators/SEC-BENCH-011/test_vulnerability.py": "db67b5a56d3925d89400e37547c18e45df5f9d705c798edddd113ceb05268007",
+        "evaluators/SEC-BENCH-011/test_secure.py": "32e5353a2fbf071851abff0006e18d65e90966e3590e2dea5cede2d09c42eef4",
+        "evaluators/SEC-BENCH-011/reference.patch": "26e05aae947f51b6e1137f764f2503364cbfc5ae1016c7dca89bd20cf4b5a33f",
+        "evaluators/SEC-BENCH-011/fixed_app.py": "418fcf642262618fc6dcac18c35e6d1d6f5f42ddc8b7dce0893b9f9d0a9793b9",
+        "tasks/SEC-BENCH-011.json": "fccf589354582ec9ea0d61bf54c33555691154149cdf982d9590b0ee1bf91807"
+      }
+    },
+    {
+      "task_id": "SEC-BENCH-012",
+      "category": "SECRET_LEAKAGE",
+      "severity": "HIGH",
+      "cwe_id": "CWE-532",
+      "title": "Sensitive Token Leakage in Webhook Error Dumps",
+      "spec_file": "tasks/SEC-BENCH-012.json",
+      "file_digests": {
+        "fixtures/SEC-BENCH-012/app.py": "015bf77572f9bee630f7b4f2ac337d613a187e65bfa9cfd1db04182e91afb545",
+        "fixtures/SEC-BENCH-012/test_public.py": "c39796a4055118e29480875d48fea4d52dda953d2a47a42706c2387dd5b9e974",
+        "evaluators/SEC-BENCH-012/test_vulnerability.py": "948f00ed2861511c858c027705f5b145d0e788cc4acfcf5e747af607681c6d27",
+        "evaluators/SEC-BENCH-012/test_secure.py": "5cbd534d64c4ef4e499ac50a302c38345899179a6db21cbeedcff0bcb78f3061",
+        "evaluators/SEC-BENCH-012/reference.patch": "375f3a457fc22fb801f97068b5eed767e28f398d9fed4c759d9c4712ed1ec471",
+        "evaluators/SEC-BENCH-012/fixed_app.py": "91b3bb0c0f2ca94c5deb17abaee9a6cecf514d2fdb6c48c696bd9fc2d7363a4f",
+        "tasks/SEC-BENCH-012.json": "f334125ff87d8b460cd6d64475b3f1852bf26137e2382bbe9b428ad97c5219d6"
+      }
+    }
+  ]
+}

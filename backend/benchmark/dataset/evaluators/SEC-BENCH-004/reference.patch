@@ -1,0 +1,11 @@
+--- a/app.py
++++ b/app.py
+@@ -19,4 +19,4 @@
+     header = json.loads(base64url_decode(parts[0]))
+     payload = json.loads(base64url_decode(parts[1]))
+     
+-    # VULNERABILITY: Accepts 'none' algorithm without signature verification!
+-    if header.get("alg") == "none":
+-        return payload
++    if header.get("alg") != "HS256":
++        raise PermissionError("Unsupported or insecure algorithm")

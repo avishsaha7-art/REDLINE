@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-001",
+  "dataset_version": "1.0.0",
+  "category": "SQL_INJECTION",
+  "severity": "CRITICAL",
+  "title": "SQL Injection in User Search Portal",
+  "description": "User portal query execution formats untrusted search terms directly into a SQL string without parameterization.",
+  "cwe_id": "CWE-89",
+  "repository_fixture": "fixtures/SEC-BENCH-001",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "All SQL statements with user input must use parameterized queries; input delimiters must not alter query logic.",
+  "expected_vulnerable_behavior": "Input query \"' OR '1'='1\" returns all database user rows including administrative accounts.",
+  "required_secure_behavior": "Input query \"' OR '1'='1\" is treated as a literal search term returning 0 rows; legitimate queries match accurately.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-001/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-001/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-001/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-001/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "In-memory SQLite only; assumes standard SQLite parameter bindings."
+  }
+}

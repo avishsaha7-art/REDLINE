@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-008",
+  "dataset_version": "1.0.0",
+  "category": "COMMAND_INJECTION",
+  "severity": "CRITICAL",
+  "title": "Command Injection in Diagnostic Ping Utility",
+  "description": "System diagnostic helper passes unvalidated target host strings into shell=True subshell.",
+  "cwe_id": "CWE-78",
+  "repository_fixture": "fixtures/SEC-BENCH-008",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "Execution must use tokenized argument lists without subshell; target host must match strict regex.",
+  "expected_vulnerable_behavior": "Passing command chaining characters executes secondary commands.",
+  "required_secure_behavior": "Host input is strictly validated (alphanumeric/dot/hyphen); invalid inputs raise ValueError.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-008/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-008/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-008/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-008/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "Tested in local environment using benign echo command."
+  }
+}

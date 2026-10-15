@@ -1,0 +1,30 @@
+{
+  "task_id": "SEC-BENCH-006",
+  "dataset_version": "1.0.0",
+  "category": "CACHE_INVALIDATION",
+  "severity": "HIGH",
+  "title": "Stale Authorization State in Permission Cache",
+  "description": "Permission revocation updates primary database but omits cache eviction, preserving unauthorized access.",
+  "cwe_id": "CWE-300",
+  "repository_fixture": "fixtures/SEC-BENCH-006",
+  "target_file": "app.py",
+  "allowed_scope": [
+    "app.py"
+  ],
+  "security_invariant": "Revocation of authorization must immediately reflect in subsequent permission queries.",
+  "expected_vulnerable_behavior": "After revoke_authorization('user-1'), is_authorized('user-1') continues returning True.",
+  "required_secure_behavior": "After revoke_authorization('user-1'), is_authorized('user-1') immediately returns False.",
+  "candidate_visible_tests": [
+    "fixtures/SEC-BENCH-006/test_public.py"
+  ],
+  "evaluator_tests": {
+    "vulnerability_test": "evaluators/SEC-BENCH-006/test_vulnerability.py",
+    "secure_acceptance_test": "evaluators/SEC-BENCH-006/test_secure.py"
+  },
+  "reference_patch": "evaluators/SEC-BENCH-006/reference.patch",
+  "provenance": {
+    "author": "REDLINE Security Engineering",
+    "review_status": "VERIFIED_FROZEN",
+    "limitations": "Tested with in-memory dictionary cache."
+  }
+}

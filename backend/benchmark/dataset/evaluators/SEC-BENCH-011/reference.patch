@@ -1,0 +1,14 @@
+--- a/app.py
++++ b/app.py
+@@ -3,4 +3,7 @@
+     def can_perform(self, role: str, action: str) -> bool:
+-        # VULNERABILITY: Default-allow: only blocks GUEST; unknown or custom roles granted admin actions
+-        if role == "GUEST":
+-            return False
+-        return True
++        ROLE_PERMISSIONS = {
++            "ADMIN": {"READ", "WRITE", "DELETE_RECORDS"},
++            "USER": {"READ", "WRITE"},
++            "GUEST": {"READ"}
++        }
++        return action in ROLE_PERMISSIONS.get(role, set())
