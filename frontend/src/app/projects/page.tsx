@@ -77,7 +77,6 @@ export default function ProjectsPage() {
   // Animation Ref
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const hasAnimatedRef = useRef<boolean>(false);
-
   const fetchRuns = async () => {
     setIsLoading(true);
     setError(null);
@@ -92,7 +91,25 @@ export default function ProjectsPage() {
   };
 
   useEffect(() => {
-    fetchRuns();
+    let ignore = false;
+    apiClient.getRunHistory()
+      .then((data) => {
+        if (!ignore) {
+          setHistory(data);
+          setError(null);
+          setIsLoading(false);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!ignore) {
+          setError(err instanceof Error ? err.message : String(err));
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   useEffect(() => {

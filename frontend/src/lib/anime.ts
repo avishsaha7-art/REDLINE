@@ -3,7 +3,7 @@
  * Safe for React 19, Next.js Turbopack SSR, and prefers-reduced-motion
  */
 
-import { animate, createTimeline, stagger, type JSAnimation, type Timeline } from 'animejs';
+import { animate, createTimeline, stagger, type JSAnimation } from 'animejs';
 
 /**
  * Checks if the user operating system or browser requests reduced motion

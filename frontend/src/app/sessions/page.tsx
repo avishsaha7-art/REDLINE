@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/api/client';
-import { RunStatus, RunHistoryItem, RunState } from '@/models/types';
+import { RunStatus, RunHistoryItem } from '@/models/types';
 import { ResourceBudgetNotice } from '@/components/ResourceBudgetNotice';
 import { VerdictDisplay } from '@/components/VerdictDisplay';
 import { LIFECYCLE_STAGES } from '@/components/OrchestrationVisualizer';
@@ -24,7 +24,7 @@ function SessionsContent() {
   const [inputRunId, setInputRunId] = useState<string>(initialRunId);
   const [status, setStatus] = useState<RunStatus | null>(null);
   const [history, setHistory] = useState<RunHistoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(initialRunId));
   const [error, setError] = useState<string | null>(null);
   const [connectionAlert, setConnectionAlert] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'timeline' | 'diff' | 'policy'>('timeline');
@@ -46,6 +46,7 @@ function SessionsContent() {
         const latest = data[data.length - 1].run_id;
         setSelectedRunId(latest);
         setInputRunId(latest);
+        setIsLoading(true);
       }
     }).catch(() => {});
 
@@ -56,19 +57,14 @@ function SessionsContent() {
 
   // Fetch run status when selectedRunId changes
   useEffect(() => {
-    if (!selectedRunId) {
-      setStatus(null);
+    const target = selectedRunId.trim();
+    if (!target) {
       return;
     }
-    const target = selectedRunId.trim();
-    if (!target) return;
 
     selectedRunIdRef.current = target;
     activePollingStartTimeRef.current = Date.now();
     consecutiveFailuresRef.current = 0;
-    setIsLoading(true);
-    setError(null);
-    setConnectionAlert(null);
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -165,8 +161,18 @@ function SessionsContent() {
   }, [selectedRunId, status]);
 
   const handleSelectRun = (id: string) => {
-    setSelectedRunId(id);
-    setInputRunId(id);
+    const trimmed = id.trim();
+    setSelectedRunId(trimmed);
+    setInputRunId(trimmed);
+    if (!trimmed) {
+      setStatus(null);
+      setIsLoading(false);
+      setError(null);
+    } else {
+      setIsLoading(true);
+      setError(null);
+      setConnectionAlert(null);
+    }
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {

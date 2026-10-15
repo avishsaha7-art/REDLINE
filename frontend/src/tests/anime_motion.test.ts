@@ -6,7 +6,6 @@ import path from 'node:path';
 import { 
   prefersReducedMotion, 
   animateEntrance, 
-  animateTableRows, 
   animateNumber, 
   animateButtonFeedback 
 } from '../lib/anime';

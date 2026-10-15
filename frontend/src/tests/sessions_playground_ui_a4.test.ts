@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import { LIFECYCLE_STAGES } from '../components/OrchestrationVisualizer';
 import { SAMPLE_CONTRACTS, SAMPLE_OBSERVATIONS } from '../app/playground/page';
-import { evaluatePollingSuccess, evaluatePollingError, isRequestCurrent } from '../app/page';
+import { evaluatePollingSuccess, evaluatePollingError } from '../app/page';
 import { RunStatus } from '../models/types';
 
 test('UI-A4 Sessions & Playground Acceptance Tests', async (t) => {

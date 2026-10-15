@@ -207,9 +207,9 @@ export default function PlaygroundPage() {
           <div>
             <div className="flex items-center gap-2 text-xs font-mono text-[#71717a] mb-1.5">
               <span className="text-[#ef4444]">ORCHESTRATION</span>
-              <span>//</span>
+              <span>{'//'}</span>
               <span className="text-[#f4f4f5]">PLAYGROUND &amp; SANDBOX</span>
-              <span>//</span>
+              <span>{'//'}</span>
               <span className="text-[#a1a1aa]">EPHEMERAL-ENCLAVE-04</span>
             </div>
 

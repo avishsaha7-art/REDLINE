@@ -55,7 +55,6 @@ function EvidenceContent() {
     if (!trimmed) return;
 
     let ignore = false;
-    setIsLoading(true);
 
     Promise.allSettled([
       apiClient.getEvidenceReceipt(trimmed)
@@ -163,9 +162,9 @@ function EvidenceContent() {
           <div>
             <div className="flex items-center gap-2 font-mono text-[11px] text-slate-500 mb-1">
               <span>ORCHESTRATION</span>
-              <span>//</span>
+              <span>{'//'}</span>
               <span className="text-slate-400">EVIDENCE &amp; PROOFS</span>
-              <span>//</span>
+              <span>{'//'}</span>
               <span className="text-[#ef4444] font-semibold">CRYPTOGRAPHIC_RECEIPTS</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">

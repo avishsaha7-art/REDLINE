@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
-import { RunHistoryItem, TaskContract } from '../models/types';
+import { RunHistoryItem } from '../models/types';
 
 // Helper to simulate the exact dashboard metric aggregation logic
 export function calculateDashboardMetrics(runs: RunHistoryItem[]) {

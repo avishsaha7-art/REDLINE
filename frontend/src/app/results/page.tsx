@@ -42,7 +42,6 @@ function ResultsContent() {
   useEffect(() => {
     if (!selectedRunId.trim()) return;
     let ignore = false;
-    setIsLoading(true);
 
     apiClient.getRunStatus(selectedRunId.trim()).then((data) => {
       if (!ignore) {
@@ -88,9 +87,9 @@ function ResultsContent() {
           <div>
             <div className="flex items-center gap-2 font-mono text-[11px] text-slate-500 mb-1">
               <span>ORCHESTRATION</span>
-              <span>//</span>
+              <span>{'//'}</span>
               <span className="text-slate-400">RUN_ANALYSIS</span>
-              <span>//</span>
+              <span>{'//'}</span>
               <span className="text-[#ef4444] font-semibold">VERDICT_RESULTS</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
