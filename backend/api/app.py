@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.api.routes import runs
+from backend.api.routes import runs, benchmark
 from backend.api.cors import get_allowed_origins, ALLOWED_METHODS, ALLOWED_HEADERS
 
 app = FastAPI(title="REDLINE API", version="1.0")
@@ -15,3 +15,4 @@ app.add_middleware(
 )
 
 app.include_router(runs.router, prefix="/api/v1/runs")
+app.include_router(benchmark.router, prefix="/api/v1/benchmark")
