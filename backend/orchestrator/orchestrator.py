@@ -200,7 +200,7 @@ class Orchestrator:
             elif state == RunState.VERIFY:
                 from backend.verification.attack_validator import validate_attack_for_execution
                 from backend.verification.attack_executor import AttackVerificationEngine
-                from backend.sandbox.backend import LocalDevelopmentBackend
+                from backend.sandbox.factory import get_sandbox_backend
                 from backend.sandbox.models import SandboxPolicy
                 from backend.verification.policy import DeterministicVerificationPolicy
                 from backend.verification.models import TestResultSummary, RegressionSummary
@@ -210,8 +210,8 @@ class Orchestrator:
                     self.selected_attacks = []
                     
                 policy = SandboxPolicy()
-                backend = LocalDevelopmentBackend(policy)
                 trust = self.repository_trust
+                backend = get_sandbox_backend(policy, repository_trust=trust)
                 try:
                     executor = AttackVerificationEngine(backend, repository_trust=trust)
                 except TypeError:
@@ -304,7 +304,7 @@ class Orchestrator:
                     self.verification_result,
                     self.selected_attacks,
                     {"provider": provider_name},
-                    {"backend": "LocalDevelopmentBackend"}
+                    {"backend": type(backend).__name__}
                 )
                             
                 # Route strictly according to deterministic verification status

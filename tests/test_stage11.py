@@ -70,9 +70,12 @@ def create_dummy_receipt():
     return receipt, contract, patch
 
 from unittest import mock
+import datetime as dt_module
 
 @mock.patch("backend.evidence.builder.datetime")
 def test_evidence_receipt_hash_determinism(mock_datetime):
+    mock_datetime.timezone = dt_module.timezone
+    mock_datetime.datetime.now.return_value.isoformat.return_value = "2026-01-01T00:00:00Z"
     mock_datetime.datetime.utcnow.return_value.isoformat.return_value = "2026-01-01T00:00:00Z"
     receipt1, _, _ = create_dummy_receipt()
     receipt2, _, _ = create_dummy_receipt()
@@ -148,10 +151,11 @@ def test_judge_agent_missing_fields():
     with pytest.raises(ValueError, match="Judge output invalid"):
         judge.generate_explanation(receipt, contract, patch)
 
-def test_orchestrator_stage11_e2e():
+def test_orchestrator_stage11_e2e(monkeypatch):
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     contract = TaskContract(
         task_id="T1",
-        repository_id="R1",
+        repository_id="repo-int-1",
         base_commit_or_snapshot="COMMIT1",
         task_description="Test Task",
         allowed_scope=["main.py"],

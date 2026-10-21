@@ -79,7 +79,8 @@ def test_credential_escape(repo_root):
     
     del os.environ["FAKE_SECRET_KEY"]
 
-def test_workspace_isolation(repo_root):
+def test_workspace_isolation(repo_root, monkeypatch):
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     # This tests the client's ability to isolate original repo from mutations
     from backend.sandbox.client import SandboxClient
     from backend.models.schemas import PatchCandidate
@@ -125,14 +126,31 @@ def test_fail_closed_untrusted_repository(repo_root):
     
     res = client.run_isolated(patch, ["python", "-c", "print('hello')"], "run-untrusted")
     
-    # Should fail closed and not execute
+    # 1. Untrusted request must never receive or execute through LocalDevelopmentBackend
+    from backend.sandbox.secure_backend import SecureSandboxBackend
+    assert isinstance(client.backend, SecureSandboxBackend)
+    assert not isinstance(client.backend, LocalDevelopmentBackend)
+
+    # 2. Execution must fail closed and never run on the host
     assert res.policy_blocked is True
     assert getattr(res, "policy_blocked", False) is True
-    assert res.exit_code == -1
-    assert "POLICY_BLOCKED" in res.stderr
-    assert "Secure sandbox backend is required" in res.stderr
+    assert res.exit_code != 0
     assert "hello" not in res.stdout
-    assert res.backend_provenance["security_level"] == "DEVELOPMENT_ONLY"
+
+    # 3. Provenance must truthfully reflect the selected backend and its capability
+    assert res.backend_provenance.get("backend") == "SecureSandboxBackend"
+    if not client.backend.capabilities().secure_untrusted_execution:
+        assert res.backend_provenance.get("security_level") == "UNAVAILABLE"
+        assert res.backend_provenance.get("status") == "OPERATIONAL_FAILURE"
+        assert "OPERATIONAL_FAILURE" in res.stderr or "POLICY_BLOCKED" in res.stderr
+    else:
+        assert res.backend_provenance.get("security_level") == "SECURE"
+
+    # 4. Confirm host-execution isolation: workspace is unmodified
+    main_file = os.path.join(repo_root, "main.py")
+    if os.path.exists(main_file):
+        with open(main_file, "r") as f:
+            assert "hello" not in f.read()
 
 def test_no_silent_fallback():
     policy = SandboxPolicy()
@@ -187,3 +205,53 @@ def test_orchestrator_gate_prevents_execute_call(repo_root):
     assert res.policy_blocked is True
     # Prove the backend was never called
     client.backend.execute.assert_not_called()
+
+def test_patch_apply_failure_provenance_and_no_execution(repo_root, monkeypatch):
+    """
+    Regression test for Finding L-01:
+    Verifies that when patch application fails:
+    1. The target command is NOT executed (backend.execute is never called).
+    2. The result is a failure (exit_code != 0, crashed=True), never a success.
+    3. Provenance truthfully includes backend name, status, trust, and security_level.
+    4. No host-execution fallback occurs.
+    """
+    from backend.sandbox.client import SandboxClient
+    from backend.sandbox.capabilities import RepositoryTrust
+    from backend.models.schemas import PatchCandidate
+    from unittest.mock import MagicMock
+
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
+    policy = SandboxPolicy(allowed_commands=["python"])
+    client = SandboxClient(policy, repo_root, repository_trust=RepositoryTrust.TRUSTED_DEVELOPMENT)
+
+    # Mock execute to prove the command is never run if patch apply fails
+    client.backend.execute = MagicMock()
+
+    # Create a corrupted patch that is guaranteed to fail git apply
+    invalid_patch = PatchCandidate(
+        patch_id="p-invalid",
+        task_id="t-patch-fail",
+        base_commit_or_snapshot="snap",
+        diff="MALFORMED PATCH CORRUPT CONTENT THAT CANNOT APPLY\n@@ -1,1 +1,1 @@\n",
+        changed_files=["nonexistent.py"]
+    )
+
+    res = client.run_isolated(invalid_patch, ["python", "-c", "print('MUST_NOT_EXECUTE')"], "run-patch-fail")
+
+    # 1. Command must not be executed
+    client.backend.execute.assert_not_called()
+
+    # 2. Result must indicate failure, never success
+    assert res.exit_code == -1
+    assert res.crashed is True
+    assert res.stdout == ""
+    assert "Patch failed to apply" in res.stderr
+    assert "MUST_NOT_EXECUTE" not in res.stdout
+
+    # 3. Provenance must accurately reflect backend, status, trust, and security level
+    assert res.backend_provenance is not None
+    assert res.backend_provenance.get("backend") == "LocalDevelopmentBackend"
+    assert res.backend_provenance.get("status") == "PATCH_APPLY_FAILED"
+    assert res.backend_provenance.get("security_level") == "DEVELOPMENT_ONLY"
+    assert res.backend_provenance.get("trust") == "TRUSTED_DEVELOPMENT"
+    assert isinstance(res.backend_provenance.get("capabilities"), dict)

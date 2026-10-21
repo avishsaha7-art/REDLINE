@@ -6,7 +6,8 @@ import hashlib
 from typing import Dict, Any, List
 from backend.models.schemas import PatchCandidate
 from backend.sandbox.models import SandboxPolicy, ExecutionRequest, ExecutionResult
-from backend.sandbox.backend import SandboxBackend, LocalDevelopmentBackend
+from backend.sandbox.backend import SandboxBackend
+from backend.sandbox.factory import get_sandbox_backend
 
 from backend.sandbox.capabilities import RepositoryTrust, SecurityLevel
 
@@ -14,7 +15,7 @@ class SandboxClient:
     def __init__(self, policy: SandboxPolicy, repo_root: str, backend: SandboxBackend = None, repository_trust: RepositoryTrust = RepositoryTrust.UNTRUSTED):
         self.policy = policy
         self.repo_root = repo_root
-        self.backend = backend or LocalDevelopmentBackend(policy)
+        self.backend = backend or get_sandbox_backend(policy, repository_trust=repository_trust)
         self.repository_trust = repository_trust
         
     def execute_patch(self, patch: PatchCandidate) -> Dict[str, Any]:
@@ -38,8 +39,10 @@ class SandboxClient:
                 stderr_sha256=hashlib.sha256(b"POLICY_BLOCKED: Secure sandbox backend is required for non-TRUSTED_DEVELOPMENT repositories.").hexdigest(),
                 policy_blocked=True,
                 backend_provenance={
-                    "security_level": caps.security_level,
-                    "trust": self.repository_trust,
+                    "backend": type(self.backend).__name__,
+                    "status": "OPERATIONAL_FAILURE",
+                    "security_level": caps.security_level.value if hasattr(caps.security_level, "value") else str(caps.security_level),
+                    "trust": self.repository_trust.value if hasattr(self.repository_trust, "value") else str(self.repository_trust),
                     "capabilities": caps.model_dump()
                 }
             )
@@ -73,8 +76,10 @@ class SandboxClient:
                         crashed=True,
                         command_metadata=["git", "apply"],
                         backend_provenance={
-                            "security_level": caps.security_level,
-                            "trust": self.repository_trust,
+                            "backend": type(self.backend).__name__,
+                            "status": "PATCH_APPLY_FAILED",
+                            "security_level": caps.security_level.value if hasattr(caps.security_level, "value") else str(caps.security_level),
+                            "trust": self.repository_trust.value if hasattr(self.repository_trust, "value") else str(self.repository_trust),
                             "capabilities": caps.model_dump()
                         }
                     )
@@ -88,11 +93,14 @@ class SandboxClient:
                 repository_trust=self.repository_trust.value
             )
             res = self.backend.execute(req, run_id)
-            res.backend_provenance = {
-                "security_level": caps.security_level,
-                "trust": self.repository_trust,
+            if not res.backend_provenance:
+                res.backend_provenance = {}
+            res.backend_provenance.update({
+                "backend": type(self.backend).__name__,
+                "security_level": caps.security_level.value if hasattr(caps.security_level, "value") else str(caps.security_level),
+                "trust": self.repository_trust.value if hasattr(self.repository_trust, "value") else str(self.repository_trust),
                 "capabilities": caps.model_dump()
-            }
+            })
             return res
         finally:
             # 5. Clean up

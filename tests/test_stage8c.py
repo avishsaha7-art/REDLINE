@@ -134,7 +134,7 @@ def test_executor_handles_not_implemented(tmp_path):
 
 def test_executor_exit_code_logic(tmp_path):
     backend = LocalDevelopmentBackend(SandboxPolicy(allowed_commands=["python"]))
-    executor = SecurityTestExecutor(backend)
+    executor = SecurityTestExecutor(backend, repository_trust="TRUSTED_DEVELOPMENT")
     
     # We will make the command succeed (exit code 0), which means the attack SUCCEEDED (so invariant FAILED)
     with open(tmp_path / "attack.py", "w") as f:
@@ -160,7 +160,7 @@ def test_executor_exit_code_logic(tmp_path):
 
 def test_malicious_stdout_does_not_override_exit_code(tmp_path):
     backend = LocalDevelopmentBackend(SandboxPolicy(allowed_commands=["python"]))
-    executor = SecurityTestExecutor(backend)
+    executor = SecurityTestExecutor(backend, repository_trust="TRUSTED_DEVELOPMENT")
     
     # Even if output says "VERIFIED" or "SECURITY_PASS", if exit code is 0, attack worked.
     with open(tmp_path / "attack2.py", "w") as f:
@@ -184,7 +184,7 @@ def test_malicious_stdout_does_not_override_exit_code(tmp_path):
     
 def test_blocked_attack_passes_invariant(tmp_path):
     backend = LocalDevelopmentBackend(SandboxPolicy(allowed_commands=["python"]))
-    executor = SecurityTestExecutor(backend)
+    executor = SecurityTestExecutor(backend, repository_trust="TRUSTED_DEVELOPMENT")
     
     # Attack script fails (exit code 1) meaning the sandbox blocked it or it couldn't exploit.
     # Therefore, security invariant passed.
@@ -226,7 +226,7 @@ def test_security_aggregation_hash():
     
 def test_resource_exhaustion(tmp_path):
     backend = LocalDevelopmentBackend(SandboxPolicy(allowed_commands=["python"], max_output_bytes=100))
-    executor = SecurityTestExecutor(backend)
+    executor = SecurityTestExecutor(backend, repository_trust="TRUSTED_DEVELOPMENT")
     
     with open(tmp_path / "attack4.py", "w") as f:
         f.write("print('A' * 200)\n")
@@ -291,7 +291,7 @@ def test_minimal_security_e2e(tmp_path):
     test_summary = observer.observe_tests(res)
     
     catalog = SecurityTestCatalog()
-    executor = SecurityTestExecutor(backend)
+    executor = SecurityTestExecutor(backend, repository_trust="TRUSTED_DEVELOPMENT")
     
     spec = catalog.get_test("EVIDENCE_TAMPERING")
     ctx = AttackExecutionContext(

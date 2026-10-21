@@ -11,8 +11,9 @@ from .security_models import (
 import hashlib
 
 class SecurityTestExecutor:
-    def __init__(self, backend: SandboxBackend):
+    def __init__(self, backend: SandboxBackend, repository_trust: str = "UNTRUSTED"):
         self.backend = backend
+        self.repository_trust = repository_trust
 
     def execute_test(self, spec: SecurityTestSpec, context: AttackExecutionContext, working_directory: str) -> SecurityObservation:
         # 1. Pre-execution checks
@@ -27,22 +28,11 @@ class SecurityTestExecutor:
             )
 
         # 2. Build execution request
-        # In a real scenario, the attack fixture might be applied to the working directory.
-        # Here we just use a predefined command based on the attack fixture/test.
+        # Authoritatively resolve execution trust: defaults to UNTRUSTED
+        # unless established by an explicit, controlled trusted caller.
+        trust_level = getattr(context, "repository_trust", None) or self.repository_trust
         
-        # We must use TRUSTED_DEVELOPMENT for testing the security engine itself in our E2E,
-        # otherwise LocalDevelopmentBackend blocks it. However, if the repository is UNTRUSTED,
-        # we would pass UNTRUSTED here. The AttackExecutionContext should conceptually carry trust,
-        # but for Stage 8C we will assume TRUSTED_DEVELOPMENT so we can actually run the tests,
-        # except when testing the policy blocking itself.
-        
-        # We will pass TRUSTED_DEVELOPMENT for our local test executor.
-        # If the environment actually blocked UNTRUSTED, we would see POLICY_BLOCKED.
-        # Wait, the prompt says "preserve Stage 8A.1". If trust is UNTRUSTED, it should be BLOCKED.
-        
-        trust_level = "TRUSTED_DEVELOPMENT"
-        
-        # To test the "untrusted + local backend = BLOCKED" boundary, we can pass a specific attack ID or context
+        # Invariant: UNTRUSTED_EXECUTION attack test always forces UNTRUSTED
         if spec.attack_id == "UNTRUSTED_EXECUTION":
             trust_level = "UNTRUSTED"
             

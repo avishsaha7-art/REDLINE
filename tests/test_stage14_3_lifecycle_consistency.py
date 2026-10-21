@@ -36,7 +36,8 @@ from tests.test_stage11 import MockModelProvider
 client = TestClient(app)
 
 @pytest.fixture(autouse=True)
-def clean_store():
+def clean_store(monkeypatch):
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     reset_run_store()
     yield
     reset_run_store()

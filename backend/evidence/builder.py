@@ -89,7 +89,7 @@ class EvidenceAggregator:
             sandbox_provenance=sandbox_provenance,
             model_provenance=model_provenance,
             evidence_hashes=verification_result.evidence_hashes,
-            timestamp=datetime.datetime.utcnow().isoformat()
+            timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat()
         )
         
         # We create the receipt without the hash, then compute it

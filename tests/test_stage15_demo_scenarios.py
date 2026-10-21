@@ -21,7 +21,8 @@ from backend.sandbox.capabilities import RepositoryTrust
 client = TestClient(app)
 
 @pytest.fixture(autouse=True)
-def clean_store():
+def clean_store(monkeypatch):
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     reset_run_store()
     set_model_provider(DeterministicTestProvider())
     yield

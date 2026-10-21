@@ -248,11 +248,12 @@ def test_attack_verification_engine_boundary_fail_closed():
     assert ce is None
 
 
-def test_authorized_trusted_development_repo_executes_successfully():
+def test_authorized_trusted_development_repo_executes_successfully(monkeypatch):
     """
     Verifies that explicitly authorized local repositories (e.g. repo-int-1)
     preserve trusted-development execution mode and can reach completion.
     """
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     payload = {
         "task_id": "TASK-TRUSTED-DEV-01",
         "repository_id": "repo-int-1",

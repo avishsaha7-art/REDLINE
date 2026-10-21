@@ -11,7 +11,8 @@ from backend.models.schemas import PatchCandidate, TaskContract, ResourceBudget
 import time
 
 @pytest.fixture
-def repo_root():
+def repo_root(monkeypatch):
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     root = tempfile.mkdtemp()
     with open(os.path.join(root, "main.py"), "w") as f:
         f.write("def add(a, b):\n    return a + b\n")
@@ -126,10 +127,11 @@ def test_e2e_minimal_flow(repo_root):
     # Minimal E2E test as requested in #30
     task = TaskContract(
         task_id="t2",
-        repository_id="repo2",
+        repository_id="repo-int-1",
         base_commit_or_snapshot="snap",
         task_description="Ensure add(2, 2) == 4",
-        allowed_scope=["main.py"]
+        allowed_scope=["main.py"],
+        repository_trust="TRUSTED_DEVELOPMENT"
     )
     
     # Original main.py

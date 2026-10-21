@@ -4,11 +4,12 @@ from backend.orchestrator.state_machine import StateMachine
 from backend.orchestrator.orchestrator import Orchestrator
 
 @pytest.fixture
-def base_task():
+def base_task(monkeypatch):
     from backend.models.schemas import ResourceBudget
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     return TaskContract(
         task_id="TASK-2",
-        repository_id="repo-2",
+        repository_id="repo-int-1",
         base_commit_or_snapshot="123456",
         task_description="Implement central orchestrator",
         allowed_scope=["backend/orchestrator/orchestrator.py", "tests/test_orchestrator.py"],
@@ -124,7 +125,7 @@ def test_orchestrator_policy_blocked(base_task):
     # let's restrict scope to something else so validation fails.
     restricted_task = TaskContract(
         task_id="TASK-3",
-        repository_id="repo-2",
+        repository_id="repo-int-1",
         base_commit_or_snapshot="abcdef",
         task_description="fail validation",
         allowed_scope=["some_other_file.py"]
