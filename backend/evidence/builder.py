@@ -61,16 +61,18 @@ class EvidenceAggregator:
         verification_result: VerificationResult,
         attacks: List[AttackCandidate],
         model_provenance: Dict[str, str],
-        sandbox_provenance: Dict[str, str]
+        sandbox_provenance: Dict[str, str],
+        snapshot_hash: Optional[str] = None
     ) -> EvidenceReceipt:
         scope = self.determine_scope(verification_result)
         
         attack_fingerprints = [a.attack_id for a in attacks]
+        resolved_snapshot_hash = snapshot_hash or getattr(self, "snapshot_hash", None) or self.task_contract.base_commit_or_snapshot
         
         receipt_dict = dict(
             run_id=run_id,
             task_id=self.task_contract.task_id,
-            repository_snapshot_hash=self.task_contract.base_commit_or_snapshot,
+            repository_snapshot_hash=resolved_snapshot_hash,
             task_contract_hash=hashlib.sha256(json.dumps(self.task_contract.model_dump(mode="json"), sort_keys=True, separators=(',', ':')).encode("utf-8")).hexdigest(),
             patch_hash=patch.patch_id,
             patch_lineage=self.patch_lineage,

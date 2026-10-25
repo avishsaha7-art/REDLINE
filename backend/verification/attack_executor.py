@@ -7,6 +7,7 @@ from backend.verification.models import (
     StructuredObservation, ExecutionStatus, OracleResult, InvariantResultStatus, Counterexample,
     OracleType as VerificationOracleType
 )
+from backend.sandbox.workspace_sanitizer import workspace_copy_ignore, assert_and_clean_workspace_secrets
 import hashlib
 
 def _map_oracle_type(attack_oracle_type) -> VerificationOracleType:
@@ -21,9 +22,11 @@ def _map_oracle_type(attack_oracle_type) -> VerificationOracleType:
         return VerificationOracleType.MODEL_EXPECTATION
 
 class AttackVerificationEngine:
-    def __init__(self, backend: SandboxBackend, repository_trust: str = "UNTRUSTED"):
+    def __init__(self, backend: SandboxBackend, repository_trust: str = "UNTRUSTED", repo_root: Optional[str] = None, patch_candidate: Optional[PatchCandidate] = None):
         self.backend = backend
         self.repository_trust = repository_trust
+        self.repo_root = repo_root
+        self.patch_candidate = patch_candidate
         self.observer = DeterministicVerificationObserver()
 
     def execute_and_verify(self, req: AttackExecutionRequest, workspace_id: str) -> tuple[StructuredObservation, OracleResult, Optional[Counterexample]]:
@@ -61,36 +64,97 @@ class AttackVerificationEngine:
             )
             return obs, oracle_res, None
 
-        # 2. Map strategy to actual execution command
-        # For this stage, we assume a structured mapping, but we don't have a real framework yet.
-        # We will mock the command for now based on strategy
-        command = ["python", "-c", f"print('Executing {req.strategy}')"]
-        
-        # 3. Create Backend Request
-        # If workspace_id is an abstract identifier rather than an existing directory path,
-        # provision an ephemeral isolated workspace for this execution step.
+        # 2. Provision and populate isolated workspace for verification
         import os
         import tempfile
         import shutil
+        import subprocess
+        
         cleanup_temp = False
         exec_dir = workspace_id
         if not (workspace_id and os.path.isdir(workspace_id)):
             exec_dir = tempfile.mkdtemp(prefix="redline_verify_ws_")
             cleanup_temp = True
-            
+            if self.repo_root and os.path.isdir(self.repo_root):
+                shutil.copytree(self.repo_root, exec_dir, dirs_exist_ok=True, ignore=workspace_copy_ignore)
+                assert_and_clean_workspace_secrets(exec_dir)
+                if self.patch_candidate and getattr(self.patch_candidate, "diff", "").strip():
+                    patch_file = os.path.join(exec_dir, "candidate.patch")
+                    diff_text = self.patch_candidate.diff if self.patch_candidate.diff.endswith("\n") else self.patch_candidate.diff + "\n"
+                    with open(patch_file, "w", newline="\n", encoding="utf-8") as f:
+                        f.write(diff_text)
+                    try:
+                        subprocess.run(["git", "init"], cwd=exec_dir, check=True, capture_output=True)
+                        subprocess.run(["git", "config", "core.autocrlf", "false"], cwd=exec_dir, check=True, capture_output=True)
+                        subprocess.run(["git", "add", "-A"], cwd=exec_dir, check=True, capture_output=True)
+                        subprocess.run(["git", "apply", "candidate.patch"], cwd=exec_dir, check=True, capture_output=True)
+                    except Exception:
+                        pass
+
+        # 3. Determine verification command against candidate workspace
+        command = None
+        if os.path.exists(os.path.join(exec_dir, "test_security.py")):
+            command = ["python", "test_security.py"]
+        elif os.path.exists(os.path.join(exec_dir, "test_main.py")):
+            command = ["python", "test_main.py"]
+        elif os.path.isdir(os.path.join(exec_dir, "tests")):
+            command = ["python", "-m", "pytest"]
+        elif req.target and os.path.exists(os.path.join(exec_dir, req.target)):
+            command = ["python", req.target]
+        else:
+            # REV-011: Absence of a valid attack test produces an explicit INCONCLUSIVE / EXECUTION_FAILURE result.
+            # Never execute a dummy successful command to manufacture PASS.
+            if cleanup_temp and exec_dir:
+                try:
+                    shutil.rmtree(exec_dir, ignore_errors=True)
+                except Exception:
+                    pass
+            obs = StructuredObservation(
+                execution_id=req.execution_id,
+                command_identifier="NO_VERIFICATION_COMMAND",
+                exit_code=None,
+                stdout_sha256=hashlib.sha256(b"").hexdigest(),
+                stderr_sha256=hashlib.sha256(b"No valid test or attack verification command found in candidate workspace").hexdigest(),
+                stdout_bytes=0,
+                stderr_bytes=len("No valid test or attack verification command found in candidate workspace"),
+                duration_ms=0,
+                status=ExecutionStatus.EXECUTION_FAILURE,
+                sandbox_backend=type(self.backend).__name__,
+                security_level="NONE",
+                capabilities={},
+                workspace_id=workspace_id or "ephemeral",
+                repository_snapshot_hash=req.snapshot_hash,
+                patch_hash=req.patch_hash
+            )
+            oracle_res = OracleResult(
+                oracle_type=_map_oracle_type(req.oracle),
+                result=InvariantResultStatus.INCONCLUSIVE,
+                evidence="No valid verification test script or test target found in workspace. Fails closed as INCONCLUSIVE."
+            )
+            return obs, oracle_res, None
+
+        # 4. Create Backend Request and Execute
         try:
             backend_req = ExecutionRequest(
                 command=command,
                 working_directory=exec_dir,
                 repository_trust=self.repository_trust,
-                timeout_seconds=min(30, req.resource_policy.max_runtime_ms // 1000)
+                timeout_seconds=min(30, max(1, req.resource_policy.max_runtime_ms // 1000))
             )
-            
-            # 4. Execute
             res = self.backend.execute(backend_req, req.run_id)
         finally:
             if cleanup_temp and exec_dir:
-                shutil.rmtree(exec_dir, ignore_errors=True)
+                def _onerror(func, p, exc_info):
+                    try:
+                        import stat
+                        os.chmod(p, stat.S_IWRITE)
+                        func(p)
+                    except Exception:
+                        pass
+                try:
+                    shutil.rmtree(exec_dir, onerror=_onerror)
+                except Exception:
+                    shutil.rmtree(exec_dir, ignore_errors=True)
         
         # 5. Observe
         obs = self.observer.observe_execution(res, workspace_id, req.snapshot_hash, req.patch_hash)

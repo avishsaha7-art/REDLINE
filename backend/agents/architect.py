@@ -32,6 +32,7 @@ class ArchitectAgent:
             "  \"risks\": [\"string\"],\n"
             "  \"expected_tests\": [\"string\"]\n"
             "}\n"
+            "All list fields MUST be JSON arrays of strings (e.g. [\"item 1\", \"item 2\"]). Do NOT output single strings for list fields.\n"
         )
         
         user_prompt = (
@@ -82,19 +83,45 @@ class ArchitectAgent:
                 "task_id": task.task_id
             })
         
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
         content = content.strip()
-        
+        if "```json" in content:
+            start = content.find("```json") + 7
+            end = content.find("```", start)
+            if end != -1:
+                content = content[start:end].strip()
+        elif "```" in content:
+            start = content.find("```") + 3
+            end = content.find("```", start)
+            if end != -1:
+                content = content[start:end].strip()
+
         try:
             data = json.loads(content)
+        except json.JSONDecodeError:
+            first_brace = content.find("{")
+            last_brace = content.rfind("}")
+            if first_brace != -1 and last_brace > first_brace:
+                try:
+                    data = json.loads(content[first_brace:last_brace + 1])
+                except json.JSONDecodeError as err:
+                    if self.events:
+                        self.events.record_event("ARCHITECT_OUTPUT_PARSE_FAILED", {"error": str(err)})
+                    return OperationalResult.MODEL_FAILURE
+            else:
+                if self.events:
+                    self.events.record_event("ARCHITECT_OUTPUT_PARSE_FAILED", {"error": "No JSON object found in response"})
+                return OperationalResult.MODEL_FAILURE
+
+        if not isinstance(data, dict):
+            if self.events:
+                self.events.record_event("ARCHITECT_SCHEMA_VALIDATION_FAILED", {"error": "Root JSON must be an object"})
+            return OperationalResult.MODEL_FAILURE
+
+        try:
             plan = ArchitectPlan(**data)
-        except (json.JSONDecodeError, ValidationError) as e:
-            import traceback; traceback.print_exc()
+        except ValidationError as e:
+            if self.events:
+                self.events.record_event("ARCHITECT_SCHEMA_VALIDATION_FAILED", {"error": str(e)})
             return OperationalResult.MODEL_FAILURE
             
         for path in plan.files_to_modify:

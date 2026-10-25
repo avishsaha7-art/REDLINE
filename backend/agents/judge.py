@@ -19,9 +19,18 @@ class JudgeAgent:
 You are the REDLINE Judge. Your only role is to explain the provided Evidence Receipt.
 You CANNOT change the verdict. The verdict is already decided by the deterministic verification policy.
 The evidence is immutable.
-You MUST output a JudgeExplanation JSON object.
+You MUST output a JudgeExplanation JSON object adhering exactly to this schema:
+{{
+  "summary": "<concise factual summary of the verification outcome>",
+  "verified_claims": ["<factual claim directly supported by receipt>", ...],
+  "failed_claims": ["<factual claim that failed or was not satisfied>", ...],
+  "evidence_references": ["<valid ID from execution_ids or attack_fingerprints, or empty list>"],
+  "limitations": "<any known bounds, caveats, or unevaluated scopes>",
+  "confidence": "<HIGH, MEDIUM, or LOW>"
+}}
+Do NOT include a "verdict" field; the verdict is already finalized.
 Your claims MUST be supported by the evidence in the receipt.
-Do not invent evidence IDs.
+Do not invent evidence IDs. Only reference valid IDs present in execution_ids or attack_fingerprints.
 </TRUSTED_SYSTEM_POLICY>
 
 <EVIDENCE_RECEIPT>
@@ -32,14 +41,48 @@ Do not invent evidence IDs.
 {task_contract.task_description}
 </TASK>
 
-Output the JudgeExplanation JSON now.
+Output the JudgeExplanation JSON object now:
 """
         messages = [{"role": "system", "content": system_prompt}]
         response = self.model_provider.generate(messages, temperature=0.0)
         
         try:
-            explanation_data = json.loads(response.response_text)
-            explanation = JudgeExplanation(**explanation_data)
+            content = response.response_text.strip()
+            data = None
+            try:
+                data = json.loads(content)
+            except Exception:
+                # Fallback 1: Extract from markdown code blocks
+                if "```" in content:
+                    for block in content.split("```"):
+                        block_stripped = block.strip()
+                        if block_stripped.startswith("json"):
+                            block_stripped = block_stripped[4:].strip()
+                        try:
+                            data = json.loads(block_stripped)
+                            break
+                        except Exception:
+                            continue
+                # Fallback 2: Extract outermost balanced braces
+                if data is None:
+                    start = content.find("{")
+                    end = content.rfind("}")
+                    if start != -1 and end != -1 and end > start:
+                        try:
+                            data = json.loads(content[start:end+1])
+                        except Exception:
+                            pass
+
+            if data is None or not isinstance(data, dict):
+                raise ValueError("No valid JSON object found in model response")
+
+            # Safely normalize single strings into lists for list fields
+            for list_field in ("verified_claims", "failed_claims", "evidence_references"):
+                if list_field in data and isinstance(data[list_field], str):
+                    val = data[list_field].strip()
+                    data[list_field] = [val] if val else []
+
+            explanation = JudgeExplanation(**data)
             
             # Additional logic to reject unsupported explanations (e.g. hallucinated IDs)
             if not self._verify_explanation_consistency(receipt, explanation):

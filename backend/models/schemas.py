@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from typing import List, Dict, Optional, Any
 import hashlib
 
@@ -52,6 +52,8 @@ class TaskContract(BaseModel):
     repository_trust: Optional[str] = None
 
 class ArchitectPlan(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     objective: str
     files_to_inspect: List[str] = Field(default_factory=list)
     files_to_modify: List[str] = Field(default_factory=list)
@@ -60,6 +62,25 @@ class ArchitectPlan(BaseModel):
     constraints: List[str] = Field(default_factory=list)
     risks: List[str] = Field(default_factory=list)
     expected_tests: List[str] = Field(default_factory=list)
+
+    @field_validator(
+        "acceptance_criteria",
+        "constraints",
+        "risks",
+        "implementation_steps",
+        "expected_tests",
+        mode="before",
+    )
+    @classmethod
+    def _normalize_string_collection(cls, v: Any, info) -> Any:
+        if isinstance(v, str):
+            v_stripped = v.strip()
+            if not v_stripped:
+                return []
+            if len(v_stripped) > 4096:
+                raise ValueError(f"{info.field_name} string exceeds maximum allowed length of 4096 characters.")
+            return [v_stripped]
+        return v
 
 class PatchCandidate(BaseModel):
     patch_id: str

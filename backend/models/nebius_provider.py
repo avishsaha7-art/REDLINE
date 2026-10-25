@@ -12,6 +12,8 @@ class NebiusProvider(OpenAICompatibleProvider):
     strict credential boundary isolation, port/scheme validation, and response limit validation.
     """
 
+    DEFAULT_MODEL = "nvidia/Nemotron-3_5-Lightning"
+
     def __init__(
         self,
         api_key: Optional[str] = None,
@@ -25,7 +27,7 @@ class NebiusProvider(OpenAICompatibleProvider):
     ):
         resolved_key = api_key or os.environ.get("NEBIUS_API_KEY")
         resolved_url = base_url or os.environ.get("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.com/v1/")
-        resolved_model = default_model or os.environ.get("NEBIUS_MODEL")
+        resolved_model = default_model if default_model is not None else (os.environ.get("NEBIUS_MODEL") or self.DEFAULT_MODEL)
 
         limit_str = os.environ.get("NEBIUS_MAX_RESPONSE_BYTES", "1048576")
         if max_response_bytes is not None:

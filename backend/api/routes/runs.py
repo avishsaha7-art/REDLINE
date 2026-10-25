@@ -126,6 +126,7 @@ def set_artifact_storage(storage: ArtifactStorage):
     global _artifact_storage
     _artifact_storage = storage
 
+from backend.models.provider import ModelProviderError
 from backend.models.registry import (
     get_model_provider as registry_get_model_provider,
     set_model_provider as registry_set_model_provider,
@@ -367,7 +368,14 @@ async def create_run(contract: TaskContract):
     )
     _runs[run_id] = run
     
-    provider = get_model_provider()
+    try:
+        provider = get_model_provider()
+    except ModelProviderError as e:
+        # Sanitize error detail and fail closed with HTTP 400
+        raise HTTPException(
+            status_code=400,
+            detail=f"Model provider configuration error: {str(e)}"
+        )
     orchestrator = Orchestrator(run_id=run_id, task_contract=authoritative_contract, model_provider=provider)
     _orchestrators[run_id] = orchestrator
     

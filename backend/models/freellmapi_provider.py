@@ -25,7 +25,14 @@ class FreeLLMAPIProvider(OpenAICompatibleProvider):
         allowed_schemes: Optional[List[str]] = None,
     ):
         resolved_key = api_key or os.environ.get("FREELLMAPI_API_KEY")
-        resolved_url = base_url or os.environ.get("FREELLMAPI_BASE_URL", "http://localhost:3001/v1")
+        resolved_url = base_url or os.environ.get("FREELLMAPI_BASE_URL", "http://127.0.0.1:3001/v1")
+        clean_url = (resolved_url or "").rstrip("/")
+        if clean_url:
+            from urllib.parse import urlparse
+            p = urlparse(clean_url)
+            if not p.path or p.path == "/":
+                clean_url = f"{clean_url}/v1"
+
         resolved_model = default_model or os.environ.get("FREELLMAPI_MODEL", "auto")
 
         limit_str = os.environ.get("FREELLMAPI_MAX_RESPONSE_BYTES", "1048576")
@@ -47,6 +54,8 @@ class FreeLLMAPIProvider(OpenAICompatibleProvider):
             approved = allowed_hostnames
         else:
             approved = ["localhost", "127.0.0.1", "::1"]
+            if os.environ.get("REDLINE_CONTAINERIZED") == "1" or os.environ.get("REDLINE_IN_CONTAINER") == "1":
+                approved.append("host.docker.internal")
             extra = os.environ.get("FREELLMAPI_APPROVED_HOSTS")
             if extra:
                 approved = approved + [h.strip().lower() for h in extra.split(",") if h.strip()]
@@ -54,15 +63,13 @@ class FreeLLMAPIProvider(OpenAICompatibleProvider):
         if allowed_ports is not None:
             approved_ports = allowed_ports
         else:
+            approved_ports = [3001]
             extra_ports = os.environ.get("FREELLMAPI_APPROVED_PORTS")
             if extra_ports:
-                approved_ports = []
                 try:
-                    approved_ports.extend([int(p.strip()) for p in extra_ports.split(",") if p.strip()])
+                    approved_ports = approved_ports + [int(p.strip()) for p in extra_ports.split(",") if p.strip()]
                 except ValueError:
                     pass
-            else:
-                approved_ports = None
 
         if allowed_schemes is not None:
             approved_schemes = allowed_schemes
@@ -71,7 +78,7 @@ class FreeLLMAPIProvider(OpenAICompatibleProvider):
 
         super().__init__(
             api_key=resolved_key,
-            base_url=resolved_url,
+            base_url=clean_url,
             default_model=resolved_model,
             max_response_bytes=resolved_bytes,
             timeout_seconds=timeout_seconds,

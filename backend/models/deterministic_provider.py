@@ -9,6 +9,9 @@ class DeterministicTestProvider(ModelProvider):
     def __init__(self, predefined_response: str = "", metadata: Optional[Dict[str, Any]] = None):
         self.predefined_response = predefined_response
         self.metadata = metadata or {}
+        self.provider_name = "deterministic-mock"
+        self.default_model = "deterministic-demo-engine-v1"
+        self.mode = "MOCK_DEVELOPMENT"
         self.calls = []
         
     def generate(
@@ -44,7 +47,11 @@ class DeterministicTestProvider(ModelProvider):
                     "expected_tests": []
                 })
             elif "REDLINE Builder" in system_msg:
-                diff = "--- a/main.py\n+++ b/main.py\n@@ -1 +1 @@\n-a\n+b\n"
+                user_msg = messages[-1]["content"] if len(messages) > 1 else ""
+                if "old" in user_msg:
+                    diff = "--- a/main.py\n+++ b/main.py\n@@ -1 +1 @@\n-old\n+new\n"
+                else:
+                    diff = "--- a/main.py\n+++ b/main.py\n@@ -1 +1 @@\n-a\n+b\n"
                 response_text = json.dumps({
                     "changed_files": ["main.py"],
                     "diff": diff
@@ -59,7 +66,11 @@ class DeterministicTestProvider(ModelProvider):
                     "confidence": "HIGH"
                 })
             elif "REDLINE Repairer" in system_msg:
-                diff = "--- a/main.py\n+++ b/main.py\n@@ -1 +1 @@\n-a\n+b\n"
+                user_msg = messages[-1]["content"] if len(messages) > 1 else ""
+                if "old" in user_msg:
+                    diff = "--- a/main.py\n+++ b/main.py\n@@ -1 +1 @@\n-old\n+repaired\n"
+                else:
+                    diff = "--- a/main.py\n+++ b/main.py\n@@ -1 +1 @@\n-a\n+b\n"
                 response_text = json.dumps({
                     "changed_files": ["main.py"],
                     "diff": diff,

@@ -83,18 +83,34 @@ class BuilderAgent:
                 "task_id": task.task_id
             })
         
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
         content = content.strip()
-        
+        if "```json" in content:
+            start = content.find("```json") + 7
+            end = content.find("```", start)
+            if end != -1:
+                content = content[start:end].strip()
+        elif "```" in content:
+            start = content.find("```") + 3
+            end = content.find("```", start)
+            if end != -1:
+                content = content[start:end].strip()
+
         try:
             data = json.loads(content)
         except json.JSONDecodeError:
-            return OperationalResult.MODEL_FAILURE
+            first_brace = content.find("{")
+            last_brace = content.rfind("}")
+            if first_brace != -1 and last_brace > first_brace:
+                try:
+                    data = json.loads(content[first_brace:last_brace + 1])
+                except json.JSONDecodeError as e:
+                    if self.events:
+                        self.events.record_event("BUILDER_OUTPUT_PARSE_FAILED", {"raw_output": content[:200], "error": str(e)})
+                    return OperationalResult.MODEL_FAILURE
+            else:
+                if self.events:
+                    self.events.record_event("BUILDER_OUTPUT_PARSE_FAILED", {"raw_output": content[:200], "error": "No JSON found"})
+                return OperationalResult.MODEL_FAILURE
             
         if not isinstance(data, dict):
             return OperationalResult.MODEL_FAILURE

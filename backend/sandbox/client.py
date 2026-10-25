@@ -10,12 +10,32 @@ from backend.sandbox.backend import SandboxBackend
 from backend.sandbox.factory import get_sandbox_backend
 
 from backend.sandbox.capabilities import RepositoryTrust, SecurityLevel
+from backend.sandbox.workspace_sanitizer import workspace_copy_ignore, assert_and_clean_workspace_secrets
+
+def _rmtree_readonly(path: str) -> None:
+    def _onerror(func, p, exc_info):
+        try:
+            import stat
+            os.chmod(p, stat.S_IWRITE)
+            func(p)
+        except Exception:
+            pass
+    try:
+        shutil.rmtree(path, onerror=_onerror)
+    except Exception:
+        shutil.rmtree(path, ignore_errors=True)
 
 class SandboxClient:
     def __init__(self, policy: SandboxPolicy, repo_root: str, backend: SandboxBackend = None, repository_trust: RepositoryTrust = RepositoryTrust.UNTRUSTED):
+        if isinstance(repository_trust, str):
+            try:
+                repository_trust = RepositoryTrust(repository_trust)
+            except ValueError:
+                repository_trust = RepositoryTrust.UNTRUSTED
         self.policy = policy
         self.repo_root = repo_root
-        self.backend = backend or get_sandbox_backend(policy, repository_trust=repository_trust)
+        trust_arg = repository_trust.value if hasattr(repository_trust, "value") else str(repository_trust)
+        self.backend = backend or get_sandbox_backend(policy, repository_trust=trust_arg)
         self.repository_trust = repository_trust
         
     def execute_patch(self, patch: PatchCandidate) -> Dict[str, Any]:
@@ -29,7 +49,8 @@ class SandboxClient:
     def run_isolated(self, patch: PatchCandidate, test_command: List[str], run_id: str) -> ExecutionResult:
         # Execution Policy Check (Fail Closed)
         caps = self.backend.capabilities()
-        if self.repository_trust != RepositoryTrust.TRUSTED_DEVELOPMENT and caps.security_level != SecurityLevel.SECURE:
+        trust_val = self.repository_trust.value if hasattr(self.repository_trust, "value") else str(self.repository_trust)
+        if trust_val != RepositoryTrust.TRUSTED_DEVELOPMENT.value and caps.security_level != SecurityLevel.SECURE:
             return ExecutionResult(
                 run_id=run_id,
                 exit_code=-1,
@@ -42,7 +63,27 @@ class SandboxClient:
                     "backend": type(self.backend).__name__,
                     "status": "OPERATIONAL_FAILURE",
                     "security_level": caps.security_level.value if hasattr(caps.security_level, "value") else str(caps.security_level),
-                    "trust": self.repository_trust.value if hasattr(self.repository_trust, "value") else str(self.repository_trust),
+                    "trust": trust_val,
+                    "capabilities": caps.model_dump()
+                }
+            )
+
+        if not (self.repo_root and os.path.isdir(self.repo_root)):
+            err_msg = f"Repository root directory does not exist or is invalid: {self.repo_root}"
+            return ExecutionResult(
+                run_id=run_id,
+                exit_code=-1,
+                stdout="",
+                stderr=err_msg,
+                stdout_sha256=hashlib.sha256(b"").hexdigest(),
+                stderr_sha256=hashlib.sha256(err_msg.encode()).hexdigest(),
+                crashed=True,
+                backend_provenance={
+                    "backend": type(self.backend).__name__,
+                    "status": "OPERATIONAL_FAILURE",
+                    "reason": "INVALID_REPOSITORY_ROOT",
+                    "security_level": caps.security_level.value if hasattr(caps.security_level, "value") else str(caps.security_level),
+                    "trust": trust_val,
                     "capabilities": caps.model_dump()
                 }
             )
@@ -50,18 +91,21 @@ class SandboxClient:
         # 1. Create isolated workspace
         workspace = tempfile.mkdtemp(prefix="redline_sandbox_")
         try:
-            # 2. Copy trusted repo snapshot to workspace (ignoring heavy/hidden dirs to speed up testing)
-            shutil.copytree(self.repo_root, workspace, dirs_exist_ok=True, ignore=shutil.ignore_patterns(".git", "venv", "__pycache__", ".pytest_cache"))
+            # 2. Copy trusted repo snapshot to workspace (excluding secrets, credentials, VCS, caches)
+            shutil.copytree(self.repo_root, workspace, dirs_exist_ok=True, ignore=workspace_copy_ignore)
+            assert_and_clean_workspace_secrets(workspace)
             
             # 3. Apply patch
-            if patch.diff.strip():
+            if patch and patch.diff.strip():
                 patch_file = os.path.join(workspace, "candidate.patch")
-                with open(patch_file, "w", encoding="utf-8") as f:
-                    f.write(patch.diff)
+                diff_text = patch.diff if patch.diff.endswith("\n") else patch.diff + "\n"
+                with open(patch_file, "w", newline="\n", encoding="utf-8") as f:
+                    f.write(diff_text)
                 
                 # Apply using git apply. Ensure workspace is a git repo first to use git tools.
                 try:
                     subprocess.run(["git", "init"], cwd=workspace, check=True, capture_output=True)
+                    subprocess.run(["git", "config", "core.autocrlf", "false"], cwd=workspace, check=True, capture_output=True)
                     subprocess.run(["git", "add", "-A"], cwd=workspace, check=True, capture_output=True)
                     subprocess.run(["git", "apply", "candidate.patch"], cwd=workspace, check=True, capture_output=True)
                 except subprocess.CalledProcessError as e:
@@ -79,7 +123,7 @@ class SandboxClient:
                             "backend": type(self.backend).__name__,
                             "status": "PATCH_APPLY_FAILED",
                             "security_level": caps.security_level.value if hasattr(caps.security_level, "value") else str(caps.security_level),
-                            "trust": self.repository_trust.value if hasattr(self.repository_trust, "value") else str(self.repository_trust),
+                            "trust": trust_val,
                             "capabilities": caps.model_dump()
                         }
                     )
@@ -90,7 +134,7 @@ class SandboxClient:
                 working_directory=workspace,
                 environment={}, # Clean environment isolated from host
                 timeout_seconds=min(30, self.policy.max_runtime_seconds),
-                repository_trust=self.repository_trust.value
+                repository_trust=trust_val
             )
             res = self.backend.execute(req, run_id)
             if not res.backend_provenance:
@@ -98,10 +142,10 @@ class SandboxClient:
             res.backend_provenance.update({
                 "backend": type(self.backend).__name__,
                 "security_level": caps.security_level.value if hasattr(caps.security_level, "value") else str(caps.security_level),
-                "trust": self.repository_trust.value if hasattr(self.repository_trust, "value") else str(self.repository_trust),
+                "trust": trust_val,
                 "capabilities": caps.model_dump()
             })
             return res
         finally:
             # 5. Clean up
-            shutil.rmtree(workspace, ignore_errors=True)
+            _rmtree_readonly(workspace)

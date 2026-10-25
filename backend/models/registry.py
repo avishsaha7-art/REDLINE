@@ -47,7 +47,8 @@ def get_model_provider(provider_name: Optional[str] = None) -> ModelProvider:
     3. If no provider is explicitly specified (unset REDLINE_MODEL_PROVIDER):
        - If NEBIUS_API_KEY is present in environment, returns NebiusProvider.
        - Else if FREELLMAPI_API_KEY is present in environment, returns FreeLLMAPIProvider.
-       - Else defaults to DeterministicTestProvider for safe, offline execution.
+       - Else raises MODEL_CONFIGURATION_ERROR. Explicit REDLINE_MODEL_PROVIDER=deterministic
+         is required for offline mock execution.
     """
     global _injected_provider
     with _provider_lock:
@@ -84,10 +85,15 @@ def get_model_provider(provider_name: Optional[str] = None) -> ModelProvider:
                 f"Unknown model provider '{target}'. Supported providers: nebius, freellmapi, deterministic."
             )
 
-    # Unset selection policy: preserve existing backward compatibility
+    # Unset selection policy: require configured credentials for live providers
     if os.environ.get("NEBIUS_API_KEY"):
         return NebiusProvider()
     elif os.environ.get("FREELLMAPI_API_KEY"):
         return FreeLLMAPIProvider()
     else:
-        return DeterministicTestProvider()
+        raise ModelProviderError(
+            ModelErrorType.MODEL_CONFIGURATION_ERROR,
+            "No model provider configured. Set NEBIUS_API_KEY for Nebius (default), "
+            "FREELLMAPI_API_KEY for FreeLLMAPI, or explicitly set "
+            "REDLINE_MODEL_PROVIDER=deterministic for offline development/demo execution."
+        )

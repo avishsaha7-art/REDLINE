@@ -121,14 +121,29 @@ def test_registry_unset_prefers_freellmapi_if_nebius_unset(monkeypatch):
     assert isinstance(provider, FreeLLMAPIProvider)
 
 
-def test_registry_unset_defaults_to_deterministic(monkeypatch):
+def test_registry_unset_without_credentials_fails_closed(monkeypatch):
+    """REV-001: Reject implicit deterministic mock selection when no live provider is configured."""
     monkeypatch.delenv("REDLINE_MODEL_PROVIDER", raising=False)
     monkeypatch.delenv("NEBIUS_API_KEY", raising=False)
     monkeypatch.delenv("FREELLMAPI_API_KEY", raising=False)
     reset_model_provider()
 
+    with pytest.raises(ModelProviderError) as exc_info:
+        get_model_provider()
+    assert exc_info.value.error_type == ModelErrorType.MODEL_CONFIGURATION_ERROR
+    assert "No model provider configured" in str(exc_info.value)
+
+
+def test_registry_explicit_deterministic_marks_mock_provenance(monkeypatch):
+    """REV-001: Require explicit REDLINE_MODEL_PROVIDER=deterministic and verify mode marker."""
+    monkeypatch.setenv("REDLINE_MODEL_PROVIDER", "deterministic")
+    reset_model_provider()
+
     provider = get_model_provider()
     assert isinstance(provider, DeterministicTestProvider)
+    assert provider.provider_name == "deterministic-mock"
+    assert provider.default_model == "deterministic-demo-engine-v1"
+    assert provider.mode == "MOCK_DEVELOPMENT"
 
 
 def test_registry_injected_override():
@@ -653,12 +668,12 @@ def test_registry_whitespace_and_case_insensitivity(monkeypatch):
     p2 = get_model_provider()
     assert isinstance(p2, FreeLLMAPIProvider)
 
-    # Whitespace-only falls back to unset auto-detection
+    # Whitespace-only falls back to unset auto-detection: fails closed if no keys configured
     monkeypatch.setenv("REDLINE_MODEL_PROVIDER", "   ")
     monkeypatch.delenv("NEBIUS_API_KEY", raising=False)
     monkeypatch.delenv("FREELLMAPI_API_KEY", raising=False)
-    p3 = get_model_provider()
-    assert isinstance(p3, DeterministicTestProvider)
+    with pytest.raises(ModelProviderError):
+        get_model_provider()
 
 
 def test_provider_failure_does_not_bypass_state_transitions():
@@ -681,3 +696,362 @@ def test_provider_failure_does_not_bypass_state_transitions():
     assert final_state == RunState.ABORTED
     assert orch.state_machine.current_state == RunState.ABORTED
     assert orch.state_machine.current_state != RunState.VERIFIED
+
+
+def test_nebius_default_nvidia_model(monkeypatch):
+    """Verify NebiusProvider selects eligible NVIDIA Nemotron model by default."""
+    monkeypatch.delenv("NEBIUS_MODEL", raising=False)
+    p = NebiusProvider(api_key="test-key")
+    assert p.default_model == "nvidia/Nemotron-3_5-Lightning"
+    assert p.base_url == "https://api.tokenfactory.nebius.com/v1"
+    assert p.allowed_hostnames == ["api.tokenfactory.nebius.com"]
+    assert p.allowed_schemes == ["https"]
+    assert p.allowed_ports == [443]
+
+
+def test_nebius_nvidia_model_override(monkeypatch):
+    """Verify NEBIUS_MODEL environment variable can override the default model."""
+    monkeypatch.setenv("NEBIUS_MODEL", "nvidia/nemotron-4-340b-instruct")
+    p = NebiusProvider(api_key="test-key")
+    assert p.default_model == "nvidia/nemotron-4-340b-instruct"
+
+
+def test_nebius_nvidia_chat_completion_request():
+    """Verify NebiusProvider correctly formats OpenAI-compatible request for NVIDIA Nemotron."""
+    provider = NebiusProvider(api_key="test-secret-token")
+    mock_resp = {
+        "id": "chatcmpl-test-123",
+        "choices": [
+            {
+                "message": {
+                    "role": "assistant",
+                    "content": '{"objective": "test", "files_to_modify": ["main.py"]}'
+                },
+                "finish_reason": "stop"
+            }
+        ],
+        "usage": {
+            "prompt_tokens": 42,
+            "completion_tokens": 18
+        }
+    }
+    raw_bytes = json.dumps(mock_resp).encode("utf-8")
+
+    with patch("requests.post") as mock_post:
+        mock_post.return_value = MockStreamingResponse(raw_bytes, status_code=200)
+        res = provider.generate(
+            [{"role": "user", "content": "analyze task"}],
+            temperature=0.0,
+            max_tokens=256
+        )
+
+        assert mock_post.called
+        call_kwargs = mock_post.call_args[1]
+        assert mock_post.call_args[0][0] == "https://api.tokenfactory.nebius.com/v1/chat/completions"
+        assert call_kwargs["headers"]["Authorization"] == "Bearer test-secret-token"
+        assert call_kwargs["json"]["model"] == "nvidia/Nemotron-3_5-Lightning"
+        assert call_kwargs["json"]["temperature"] == 0.0
+        assert call_kwargs["json"]["max_tokens"] == 256
+        assert call_kwargs["allow_redirects"] is False
+        assert call_kwargs["stream"] is True
+
+        assert res.model == "nvidia/Nemotron-3_5-Lightning"
+        assert res.provider == "nebius"
+        assert res.input_tokens == 42
+        assert res.output_tokens == 18
+        assert "objective" in res.response_text
+
+
+def test_nebius_malformed_patch_fails_closed():
+    """Verify that malformed patch suggestions from Nebius model fail closed without bypassing verification."""
+    from backend.models.schemas import TaskContract, RunState, ResourceBudget
+    from backend.orchestrator.orchestrator import Orchestrator
+
+    class MalformedNebiusMock(NebiusProvider):
+        def __init__(self):
+            super().__init__(api_key="mock-key")
+        def generate(self, messages, **kwargs):
+            system_msg = messages[0]["content"] if messages else ""
+            if "Architect" in system_msg:
+                return ModelResponse(
+                    provider="nebius",
+                    model="nvidia/Nemotron-3_5-Lightning",
+                    response_text=json.dumps({"objective": "test", "files_to_modify": ["main.py"]}),
+                    timestamp=time.time()
+                )
+            # Builder returns invalid, malformed diff
+            return ModelResponse(
+                provider="nebius",
+                model="nvidia/Nemotron-3_5-Lightning",
+                response_text=json.dumps({"changed_files": ["main.py"], "diff": "MALFORMED NOT A DIFF"}),
+                timestamp=time.time()
+            )
+
+    contract = TaskContract(
+        task_id="t-malformed",
+        repository_id="repo-cons-1",
+        base_commit_or_snapshot="snap-1",
+        task_description="test malformed patch",
+        allowed_scope=["main.py"],
+        repository_trust="TRUSTED_DEVELOPMENT",
+        resource_budget=ResourceBudget(max_iterations=5, max_failed_attempts=1)
+    )
+    orch = Orchestrator(run_id="run-malformed", task_contract=contract, model_provider=MalformedNebiusMock())
+    final_state = orch.run()
+    # Invariant: Malformed diff cannot produce VERIFIED
+    assert final_state != RunState.VERIFIED
+    assert orch.state_machine.current_state != RunState.VERIFIED
+
+
+# =====================================================================
+# Step 2.9.7: FreeLLMAPI Provider Comprehensive Unit Tests
+# =====================================================================
+
+def test_freellmapi_chat_completion_mock_success():
+    """Verify FreeLLMAPIProvider correctly formats and parses OpenAI-compatible chat completions."""
+    provider = FreeLLMAPIProvider(
+        api_key="freellmapi-secret-key-xyz",
+        base_url="http://127.0.0.1:3001/v1",
+        default_model="auto"
+    )
+    mock_resp = {
+        "id": "freellmapi-cmpl-001",
+        "choices": [
+            {
+                "message": {
+                    "role": "assistant",
+                    "content": '{"objective": "repair test", "files_to_modify": ["main.py"]}'
+                },
+                "finish_reason": "stop"
+            }
+        ],
+        "usage": {
+            "prompt_tokens": 55,
+            "completion_tokens": 25
+        }
+    }
+    raw_bytes = json.dumps(mock_resp).encode("utf-8")
+
+    with patch("requests.post") as mock_post:
+        mock_post.return_value = MockStreamingResponse(raw_bytes, status_code=200)
+        res = provider.generate(
+            [{"role": "user", "content": "analyze bug"}],
+            temperature=0.2,
+            max_tokens=512
+        )
+
+        assert mock_post.called
+        call_args, call_kwargs = mock_post.call_args
+        assert call_args[0] == "http://127.0.0.1:3001/v1/chat/completions"
+        assert call_kwargs["headers"]["Authorization"] == "Bearer freellmapi-secret-key-xyz"
+        assert call_kwargs["json"]["model"] == "auto"
+        assert call_kwargs["json"]["temperature"] == 0.2
+        assert call_kwargs["json"]["max_tokens"] == 512
+        assert call_kwargs["allow_redirects"] is False
+        assert call_kwargs["stream"] is True
+
+        assert res.model == "auto"
+        assert res.provider == "freellmapi"
+        assert res.input_tokens == 55
+        assert res.output_tokens == 25
+        assert "objective" in res.response_text
+
+
+def test_freellmapi_custom_model_configuration(monkeypatch):
+    """Verify FreeLLMAPIProvider respects explicit FREELLMAPI_MODEL environment variable."""
+    monkeypatch.setenv("FREELLMAPI_MODEL", "groq/llama-3.3-70b-versatile")
+    provider = FreeLLMAPIProvider(api_key="test-key")
+    assert provider.default_model == "groq/llama-3.3-70b-versatile"
+    assert provider.base_url == "http://127.0.0.1:3001/v1"
+
+
+def test_freellmapi_auth_failure_401():
+    """Verify HTTP 401 raises MODEL_AUTHENTICATION_ERROR without leaking the secret token."""
+    secret_key = "sensitive-freellmapi-token-987"
+    provider = FreeLLMAPIProvider(api_key=secret_key)
+
+    with patch("requests.post") as mock_post:
+        mock_post.return_value = MockStreamingResponse(b"Unauthorized", status_code=401)
+        with pytest.raises(ModelProviderError) as exc_info:
+            provider.generate([{"role": "user", "content": "hello"}])
+
+        assert exc_info.value.error_type == ModelErrorType.MODEL_AUTHENTICATION_ERROR
+        assert "authentication failed" in str(exc_info.value)
+        assert secret_key not in str(exc_info.value)
+
+
+def test_freellmapi_rate_limit_429():
+    """Verify HTTP 429 raises MODEL_RATE_LIMIT without exposing credentials."""
+    provider = FreeLLMAPIProvider(api_key="test-key")
+
+    with patch("requests.post") as mock_post:
+        mock_post.return_value = MockStreamingResponse(b"Rate limit exceeded", status_code=429)
+        with pytest.raises(ModelProviderError) as exc_info:
+            provider.generate([{"role": "user", "content": "hello"}])
+
+        assert exc_info.value.error_type == ModelErrorType.MODEL_RATE_LIMIT
+        assert "rate limit exceeded" in str(exc_info.value)
+
+
+def test_freellmapi_timeout_error():
+    """Verify connection timeout raises MODEL_TIMEOUT."""
+    provider = FreeLLMAPIProvider(api_key="test-key", timeout_seconds=15.0)
+
+    with patch("requests.post", side_effect=requests.exceptions.Timeout("Request timed out")):
+        with pytest.raises(ModelProviderError) as exc_info:
+            provider.generate([{"role": "user", "content": "hello"}])
+
+        assert exc_info.value.error_type == ModelErrorType.MODEL_TIMEOUT
+        assert "timed out after 15.0s" in str(exc_info.value)
+
+
+def test_freellmapi_upstream_error_502_503():
+    """Verify HTTP 502/503 raises MODEL_UNAVAILABLE."""
+    provider = FreeLLMAPIProvider(api_key="test-key")
+
+    for code in (502, 503, 504):
+        with patch("requests.post") as mock_post:
+            mock_post.return_value = MockStreamingResponse(b"Bad Gateway", status_code=code)
+            with pytest.raises(ModelProviderError) as exc_info:
+                provider.generate([{"role": "user", "content": "hello"}])
+
+            assert exc_info.value.error_type == ModelErrorType.MODEL_UNAVAILABLE
+            assert f"HTTP {code}" in str(exc_info.value)
+
+
+def test_freellmapi_malformed_json_response():
+    """Verify non-JSON response raises MODEL_INVALID_RESPONSE."""
+    provider = FreeLLMAPIProvider(api_key="test-key")
+
+    with patch("requests.post") as mock_post:
+        mock_post.return_value = MockStreamingResponse(b"<html>500 Internal Error</html>", status_code=200)
+        with pytest.raises(ModelProviderError) as exc_info:
+            provider.generate([{"role": "user", "content": "hello"}])
+
+        assert exc_info.value.error_type == ModelErrorType.MODEL_INVALID_RESPONSE
+        assert "Failed to parse" in str(exc_info.value)
+
+
+def test_freellmapi_missing_choices_response():
+    """Verify JSON response missing choices array raises MODEL_INVALID_RESPONSE."""
+    provider = FreeLLMAPIProvider(api_key="test-key")
+    resp_bytes = json.dumps({"id": "err-1", "choices": []}).encode("utf-8")
+
+    with patch("requests.post") as mock_post:
+        mock_post.return_value = MockStreamingResponse(resp_bytes, status_code=200)
+        with pytest.raises(ModelProviderError) as exc_info:
+            provider.generate([{"role": "user", "content": "hello"}])
+
+        assert exc_info.value.error_type == ModelErrorType.MODEL_INVALID_RESPONSE
+        assert "missing 'choices'" in str(exc_info.value)
+
+
+def test_freellmapi_unapproved_remote_hostname_blocked():
+    """Verify FreeLLMAPI rejects unapproved remote destinations to prevent SSRF and token exfiltration."""
+    unapproved_urls = [
+        "http://attacker-remote-gateway.com:3001/v1",
+        "https://api.external-service.org/v1",
+        "http://192.168.1.100:3001/v1",
+    ]
+    for url in unapproved_urls:
+        provider = FreeLLMAPIProvider(api_key="test-key", base_url=url)
+        with pytest.raises(ModelProviderError) as exc_info:
+            provider.generate([{"role": "user", "content": "hello"}])
+
+        assert exc_info.value.error_type == ModelErrorType.MODEL_CONFIGURATION_ERROR
+        assert "not in approved destinations" in str(exc_info.value)
+
+
+def test_freellmapi_host_docker_internal_and_approved_hosts(monkeypatch):
+    """Verify host.docker.internal requires explicit configuration or containerized flag (REV-005)."""
+    # In default host mode without container flag, host.docker.internal is rejected
+    monkeypatch.delenv("REDLINE_CONTAINERIZED", raising=False)
+    monkeypatch.delenv("REDLINE_IN_CONTAINER", raising=False)
+    monkeypatch.delenv("FREELLMAPI_APPROVED_HOSTS", raising=False)
+    with pytest.raises(ModelProviderError) as exc:
+        p = FreeLLMAPIProvider(api_key="test-key", base_url="http://host.docker.internal:3001/v1")
+        p.generate([{"role": "user", "content": "hi"}])
+    assert "not in approved destinations" in str(exc.value)
+
+    # When REDLINE_CONTAINERIZED=1, host.docker.internal is automatically approved
+    monkeypatch.setenv("REDLINE_CONTAINERIZED", "1")
+    p_docker = FreeLLMAPIProvider(api_key="test-key", base_url="http://host.docker.internal:3001/v1")
+    assert "host.docker.internal" in p_docker.allowed_hostnames
+
+    # Custom approved host via environment
+    monkeypatch.delenv("REDLINE_CONTAINERIZED", raising=False)
+    monkeypatch.setenv("FREELLMAPI_APPROVED_HOSTS", "internal-gateway.corp,myrouter.local")
+    p_custom = FreeLLMAPIProvider(api_key="test-key", base_url="http://internal-gateway.corp:3001/v1")
+    assert "internal-gateway.corp" in p_custom.allowed_hostnames
+    assert "myrouter.local" in p_custom.allowed_hostnames
+
+
+def test_orchestrator_records_freellmapi_provenance():
+    """Verify that Orchestrator records FreeLLMAPI provider and model identifier in EvidenceReceipt."""
+    from backend.models.schemas import TaskContract, RunState, ResourceBudget
+    from backend.orchestrator.orchestrator import Orchestrator
+
+    class MockFreeLLMAPI(FreeLLMAPIProvider):
+        def __init__(self):
+            super().__init__(api_key="mock-key", default_model="groq/llama-3.3-70b-versatile")
+        def generate(self, messages, **kwargs):
+            system_msg = messages[0]["content"] if messages else ""
+            if "Architect" in system_msg:
+                return ModelResponse(
+                    provider="freellmapi",
+                    model="groq/llama-3.3-70b-versatile",
+                    response_text=json.dumps({"objective": "test", "files_to_modify": ["main.py"]}),
+                    timestamp=time.time()
+                )
+            return ModelResponse(
+                provider="freellmapi",
+                model="groq/llama-3.3-70b-versatile",
+                response_text=json.dumps({"changed_files": ["main.py"], "diff": "--- a/main.py\n+++ b/main.py\n@@ -1 +1 @@\n-old\n+new"}),
+                timestamp=time.time()
+            )
+
+    contract = TaskContract(
+        task_id="t-provenance",
+        repository_id="repo-cons-1",
+        base_commit_or_snapshot="snap-prov",
+        task_description="test provenance recording",
+        allowed_scope=["main.py"],
+        repository_trust="TRUSTED_DEVELOPMENT",
+        resource_budget=ResourceBudget(max_iterations=1, max_failed_attempts=1)
+    )
+    orch = Orchestrator(run_id="run-prov-1", task_contract=contract, model_provider=MockFreeLLMAPI())
+    orch.run()
+
+    assert orch.evidence_receipt is not None
+    assert orch.evidence_receipt.model_provenance.get("provider") == "freellmapi"
+    assert orch.evidence_receipt.model_provenance.get("model") == "groq/llama-3.3-70b-versatile"
+
+
+def test_freellmapi_credentials_never_enter_sandbox(monkeypatch):
+    """Verify that FreeLLMAPI credentials are never propagated to candidate container environments."""
+    from backend.sandbox.secure_backend import SecureSandboxBackend
+    from backend.sandbox.models import SandboxPolicy
+
+    monkeypatch.setenv("FREELLMAPI_API_KEY", "super-secret-freellmapi-token-xyz")
+    policy = SandboxPolicy(
+        cpu_limit=1.0,
+        pids_limit=32,
+        max_memory_bytes=64 * 1024 * 1024,
+        max_runtime_seconds=10,
+        max_output_bytes=1024 * 1024
+    )
+    backend = SecureSandboxBackend(policy=policy)
+    cmd_args = backend.build_container_args(
+        engine="docker",
+        container_name="test-box",
+        canonical_workspace="/tmp/ws",
+        command=["python", "test.py"],
+        env={}
+    )
+
+    full_arg_str = " ".join(cmd_args)
+    assert "super-secret-freellmapi-token-xyz" not in full_arg_str
+    assert "FREELLMAPI_API_KEY" not in full_arg_str
+    assert "--network none" in full_arg_str
+
+

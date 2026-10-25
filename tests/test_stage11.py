@@ -163,9 +163,9 @@ def test_orchestrator_stage11_e2e(monkeypatch):
     )
     provider = MockModelProvider([
         # Architect
-        json.dumps({"objective": "...", "rationale": "...", "files_to_modify": ["main.py"], "instructions": "..."}),
+        json.dumps({"objective": "...", "files_to_modify": ["main.py"], "constraints": ["none"]}),
         # Builder
-        json.dumps({"changed_files": ["main.py"], "diff": "--- a/main.py\n+++ b/main.py\n@@ -1,1 +1,2 @@\n+print('hello')"}),
+        json.dumps({"changed_files": ["main.py"], "diff": "--- a/main.py\n+++ b/main.py\n@@ -1,1 +1,1 @@\n-a\n+print('hello')\n"}),
         # Judge
         json.dumps({
             "summary": "pass",

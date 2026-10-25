@@ -141,6 +141,16 @@ class OpenAICompatibleProvider(ModelProvider):
                 f"Ambiguous octal IP representation is not allowed: '{raw_hostname}'"
             )
 
+        # Hostname allowlist validation
+        if self.allowed_hostnames is not None:
+            hostname_lower = raw_hostname.lower()
+            allowed = [h.lower() for h in self.allowed_hostnames]
+            if hostname_lower not in allowed:
+                raise ModelProviderError(
+                    ModelErrorType.MODEL_CONFIGURATION_ERROR,
+                    f"Credential destination policy blocked: Hostname '{hostname_lower}' is not in approved destinations for {self.provider_name}: {allowed}"
+                )
+
         # Port validation
         try:
             port = parsed.port
@@ -169,16 +179,6 @@ class OpenAICompatibleProvider(ModelProvider):
                         ModelErrorType.MODEL_CONFIGURATION_ERROR,
                         f"Default port {default_scheme_port} for scheme '{parsed.scheme}' is not permitted for {self.provider_name}: {self.allowed_ports}"
                     )
-
-        # Hostname allowlist validation
-        if self.allowed_hostnames is not None:
-            hostname_lower = raw_hostname.lower()
-            allowed = [h.lower() for h in self.allowed_hostnames]
-            if hostname_lower not in allowed:
-                raise ModelProviderError(
-                    ModelErrorType.MODEL_CONFIGURATION_ERROR,
-                    f"Credential destination policy blocked: Hostname '{hostname_lower}' is not in approved destinations for {self.provider_name}: {allowed}"
-                )
 
     def _redact_secrets(self, text: str) -> str:
         """
