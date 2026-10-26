@@ -3,11 +3,17 @@ import json
 import hashlib
 from backend.models.schemas import TaskContract, PatchCandidate, ResourceBudget, RunState
 from backend.models.evidence import EvidenceReceipt, VerificationScope, verify_receipt_integrity
-from backend.verification.models import VerificationStatus
+from backend.verification.models import VerificationStatus, StructuredObservation, ExecutionStatus, OracleResult, Counterexample
 from backend.evidence.builder import EvidenceAggregator
 from backend.orchestrator.orchestrator import Orchestrator
 from backend.orchestrator.limits import GovernanceController
 from tests.test_stage11 import MockModelProvider
+from backend.models.evidence import JudgeExplanation
+
+@pytest.fixture(autouse=True)
+def enable_local_backend(monkeypatch):
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
+    yield
 
 def test_finding_1_task_contract_hash_determinism():
     contract1 = TaskContract(
@@ -120,7 +126,7 @@ def test_finding_2_receipt_hash_timestamp_independence():
 def test_finding_3_patch_lineage():
     contract = TaskContract(
         task_id="T1",
-        repository_id="R1",
+        repository_id="repo-cons-1",
         base_commit_or_snapshot="COMMIT1",
         task_description="Test Task",
         allowed_scope=["main.py"],
@@ -128,79 +134,88 @@ def test_finding_3_patch_lineage():
     )
     provider = MockModelProvider([
         # Architect
-        json.dumps({"objective": "...", "rationale": "...", "files_to_modify": ["main.py"], "instructions": "..."}),
-        # Builder (Patch 1)
-        json.dumps({"changed_files": ["main.py"], "diff": "--- a/main.py\n+++ b/main.py\n@@ -1,1 +1,2 @@\n+print('hello')"}),
+        json.dumps({"objective": "test", "files_to_modify": ["main.py"]}),
+        # Builder (Initial buggy patch)
+        json.dumps({"changed_files": ["main.py"], "diff": "--- a/main.py\n+++ b/main.py\n@@ -1 +1 @@\n-old\n+v1\n"}),
         # RedTeam
         json.dumps([{
-            "attack_id": "A1", 
-            "objective": "objective", 
-            "target": "target", 
-            "input_specification": "input_spec", 
-            "execution_strategy": "TEST_CASE", 
-            "expected_failure_signal": "signal", 
-            "oracle_type": "TASK_INVARIANT", 
-            "risk_level": "HIGH", 
-            "rationale": "rationale", 
+            "attack_id": "A1",
+            "objective": "Trigger bug",
+            "target": "main.py",
+            "input_specification": "edge_case",
+            "execution_strategy": "FUNCTION_INPUT",
+            "expected_failure_signal": "Crash",
+            "oracle_type": "TASK_INVARIANT",
+            "risk_level": "HIGH",
+            "rationale": "Edge case test",
             "attack_type": "INPUT"
         }]),
-        # Repairer (Patch 2)
-        json.dumps({"diff": "--- a/main.py\n+++ b/main.py\n@@ -1,1 +1,2 @@\n+print('repaired')", "changed_files": ["main.py"], "target_failure": "fail", "reasoning_summary": "reason"}),
-        # Judge
-        json.dumps({"summary": "pass", "verified_claims": [], "failed_claims": [], "evidence_references": [], "limitations": "None", "confidence": "High"})
+        # Repairer (Repaired patch)
+        json.dumps({
+            "diff": "--- a/main.py\n+++ b/main.py\n@@ -1 +1 @@\n-old\n+repaired\n",
+            "changed_files": ["main.py"],
+            "target_failure": "edge_case",
+            "reasoning_summary": "Fixed edge case"
+        })
     ])
-    
+
     orch = Orchestrator("RUN1", contract, model_provider=provider)
-    
-    # Mocking verify to fail first time, pass second time
-    original_verify = None # we will intercept it at a lower level or just mock the verify phase
-    class _SharedState:
-        calls = 0
-        
-    class FakeExecutor:
+
+    call_count = 0
+    class RepairExecutor:
         def __init__(self, backend=None):
             pass
         def execute_and_verify(self, req, workspace_id):
-            from backend.verification.models import StructuredObservation, OracleResult, Counterexample, TestStatus, ExecutionStatus, InvariantResultStatus
-            _SharedState.calls += 1
-            if _SharedState.calls == 1:
-                # Fail
-                obs = StructuredObservation(execution_id="E1", status=ExecutionStatus.SUCCESS, command_identifier="test", stdout_sha256="", stderr_sha256="", stdout_bytes=0, stderr_bytes=0, duration_ms=0, sandbox_backend="", security_level="", capabilities={}, workspace_id="", repository_snapshot_hash="", patch_hash="", exit_code=0)
-                oracle = OracleResult(result="FAIL", oracle_type="DETERMINISTIC_CONTRACT", evidence="fail_evidence")
-                ce = Counterexample(counterexample_id="CE1", invariant_id="INV1", test_id="T1", input_data="d", observed_output="o", expected_output="e", failure_reason="f", oracle_type="DETERMINISTIC_CONTRACT", execution_id="E1", evidence_hash="")
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                # First attempt fails -> triggers repair
+                obs = StructuredObservation(
+                    execution_id="E-1", status=ExecutionStatus.SUCCESS, command_identifier="test",
+                    stdout_sha256="", stderr_sha256="", stdout_bytes=0, stderr_bytes=0, duration_ms=0,
+                    sandbox_backend="", security_level="", capabilities={}, workspace_id="",
+                    repository_snapshot_hash="", patch_hash="", exit_code=0
+                )
+                oracle = OracleResult(result="FAIL", oracle_type="DETERMINISTIC_CONTRACT", evidence="Failing initial test")
+                ce = Counterexample(
+                    counterexample_id="CE-1", invariant_id="INV-1", test_id="T-1",
+                    input_data="edge_case", observed_output="crash", expected_output="pass",
+                    failure_reason="Unhandled edge case", oracle_type="DETERMINISTIC_CONTRACT",
+                    execution_id="E-1", evidence_hash=""
+                )
                 return obs, oracle, ce
             else:
-                # Pass
-                obs = StructuredObservation(execution_id="E2", status=ExecutionStatus.SUCCESS, command_identifier="test", stdout_sha256="", stderr_sha256="", stdout_bytes=0, stderr_bytes=0, duration_ms=0, sandbox_backend="", security_level="", capabilities={}, workspace_id="", repository_snapshot_hash="", patch_hash="", exit_code=0)
-                oracle = OracleResult(result="PASS", oracle_type="DETERMINISTIC_CONTRACT", evidence="pass_evidence")
+                # Repaired attempt passes -> reaches VERIFIED
+                obs = StructuredObservation(
+                    execution_id="E-2", status=ExecutionStatus.SUCCESS, command_identifier="test",
+                    stdout_sha256="", stderr_sha256="", stdout_bytes=0, stderr_bytes=0, duration_ms=0,
+                    sandbox_backend="", security_level="", capabilities={}, workspace_id="",
+                    repository_snapshot_hash="", patch_hash="", exit_code=0
+                )
+                oracle = OracleResult(result="PASS", oracle_type="DETERMINISTIC_CONTRACT", evidence="Edge case handled cleanly")
                 return obs, oracle, None
-                
-    # We must patch the Orchestrator's internal VERIFY step or just the engine
+
     import backend.verification.attack_executor as exec_module
     old_engine = exec_module.AttackVerificationEngine
-    exec_module.AttackVerificationEngine = FakeExecutor
-    
-    # Mock the Judge generation to not fail on ID mismatch due to static mock
-    original_generate = orch.judge.generate_explanation
-    from backend.models.evidence import JudgeExplanation
-    def fake_generate(receipt, contract, patch):
-        return JudgeExplanation(
-            summary="pass",
-            verified_claims=[],
-            failed_claims=[],
-            evidence_references=[],
-            limitations="None",
-            confidence="High"
-        )
-    orch.judge.generate_explanation = fake_generate
+    exec_module.AttackVerificationEngine = RepairExecutor
+
+    # Supply deterministic judge explanation
+    orch.judge.generate_explanation = lambda r, c, p: JudgeExplanation(
+        summary="Verified repaired candidate",
+        verified_claims=[],
+        failed_claims=[],
+        evidence_references=[],
+        limitations="None",
+        confidence="High"
+    )
 
     try:
         final_state = orch.run()
     finally:
         exec_module.AttackVerificationEngine = old_engine
-    
+
     assert final_state == RunState.VERIFIED
-    
+
     # Check lineage
     print([e["event_type"] for e in orch.state_machine.events.get_events()])
     assert len(orch.patch_lineage) == 2

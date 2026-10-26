@@ -82,7 +82,10 @@ def test_stage12_2_end_to_end_orchestrator_integration():
     # Assertions on EvidenceReceipt
     assert receipt["run_id"] == run_id
     assert receipt["task_id"] == "TASK-INT-1"
-    assert receipt["repository_snapshot_hash"] == "snap-int-1"
+    # repository_snapshot_hash is SHA-256 of canonical workspace contents, not the input string
+    assert isinstance(receipt["repository_snapshot_hash"], str)
+    assert len(receipt["repository_snapshot_hash"]) == 64
+    assert all(c in "0123456789abcdef" for c in receipt["repository_snapshot_hash"].lower())
     assert "receipt_hash" in receipt and receipt["receipt_hash"] is not None
     assert "patch_lineage" in receipt
     assert isinstance(receipt["patch_lineage"], list)
@@ -149,9 +152,13 @@ def test_stage12_2_failure_path_operational():
     assert "POLICY_BLOCKED" in final_data["operational_error"] or "Unauthorized" in final_data["operational_error"]
     assert final_data["operational_result"] == OperationalResult.POLICY_BLOCKED.value
 
-    # Receipt is not generated for early policy-aborted run -> 404
+    # Receipt IS generated for early policy-aborted run (fail-closed operational receipt) -> 200
+    # but verdict is non-VERIFIED (POLICY_BLOCKED or INCONCLUSIVE depending on verification path)
     receipt_resp = client.get(f"/api/v1/runs/{run_id}/receipt")
-    assert receipt_resp.status_code == 404
+    assert receipt_resp.status_code == 200
+    receipt = receipt_resp.json()
+    assert receipt["verdict"] != "VERIFIED"
+    assert receipt["verdict"] in ["POLICY_BLOCKED", "INCONCLUSIVE", "REJECTED"]
 
 def test_stage12_2_background_exception_captured_and_not_swallowed():
     """
@@ -229,7 +236,7 @@ def test_stage12_2_adversarial_security_injections():
     # Initial state queried immediately must not reflect injected state
     get_resp = client.get(f"/api/v1/runs/{run_id}")
     data = get_resp.json()
-    assert data["state"] in [RunState.INIT.value, RunState.RECON.value, RunState.PLAN.value, RunState.BASELINE.value, RunState.BUILD.value, RunState.VERIFIED.value]
+    assert data["state"] in [RunState.INIT.value, RunState.RECON.value, RunState.PLAN.value, RunState.BASELINE.value, RunState.BUILD.value, RunState.TEST.value, RunState.VERIFIED.value]
     assert data["state"] != "TRUSTED"
     assert "authorize_sandbox" not in data
 

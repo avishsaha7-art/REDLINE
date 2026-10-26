@@ -58,11 +58,15 @@ def test_api_cancel_benchmark_run(client):
     assert cancel_resp.json()["state"] == "CANCELLED"
 
 
-def test_api_start_benchmark_run_fails_closed_without_container_runtime(client):
+def test_api_start_benchmark_run_fails_closed_without_container_runtime(client, monkeypatch):
     """
     POST /api/v1/benchmark/runs/{run_id}/start on this host fails closed to
     OPERATIONAL_FAILURE because Docker/Podman is not running.
     """
+    monkeypatch.setattr(
+        "backend.sandbox.secure_backend.ContainerRuntimeProbe.detect_runtime",
+        lambda self: (False, "NONE", {"error": "Mocked: container daemon not present"})
+    )
     create_resp = client.post("/api/v1/benchmark/runs", json={"arm_type": "ARM_A_REDLINE"})
     run_id = create_resp.json()["run_id"]
 

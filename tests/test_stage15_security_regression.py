@@ -18,7 +18,11 @@ from backend.models.attack import AttackType, OracleType, AttackResourceBudget
 client = TestClient(app)
 
 @pytest.fixture(autouse=True)
-def clean_store():
+def clean_store(monkeypatch):
+    monkeypatch.setattr(
+        "backend.sandbox.secure_backend.ContainerRuntimeProbe.detect_runtime",
+        lambda self: (False, "NONE", {"error": "Mocked: container daemon not present"})
+    )
     reset_run_store()
     set_model_provider(DeterministicTestProvider())
     yield

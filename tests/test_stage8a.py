@@ -14,9 +14,9 @@ import time
 def repo_root(monkeypatch):
     monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     root = tempfile.mkdtemp()
-    with open(os.path.join(root, "main.py"), "w") as f:
+    with open(os.path.join(root, "main.py"), "w", newline="\n") as f:
         f.write("def add(a, b):\n    return a + b\n")
-    with open(os.path.join(root, "test_main.py"), "w") as f:
+    with open(os.path.join(root, "test_main.py"), "w", newline="\n") as f:
         f.write("from main import add\ndef test_add():\n    assert add(2, 2) == 4\n")
     yield root
     shutil.rmtree(root, ignore_errors=True)
@@ -51,7 +51,7 @@ def test_isolated_workspace_execution(repo_root):
     )
     
     # We use python to run tests (or pytest if allowed). Let's use python with unittest or just run test_main.py
-    with open(os.path.join(repo_root, "test_main.py"), "w") as f:
+    with open(os.path.join(repo_root, "test_main.py"), "w", newline="\n") as f:
         f.write("from main import add\nassert add(2, 2) == 4, 'Math is broken!'\nprint('SUCCESS')\n")
     
     res = client.run_isolated(patch, ["python", "test_main.py"], "run-1")
@@ -135,11 +135,11 @@ def test_e2e_minimal_flow(repo_root):
     )
     
     # Original main.py
-    with open(os.path.join(repo_root, "main.py"), "w") as f:
+    with open(os.path.join(repo_root, "main.py"), "w", newline="\n") as f:
         f.write("def add(a, b):\n    pass\n")
-        
+
     # Trusted test
-    with open(os.path.join(repo_root, "test_main.py"), "w") as f:
+    with open(os.path.join(repo_root, "test_main.py"), "w", newline="\n") as f:
         f.write("from main import add\nassert add(2, 2) == 4\nprint('SUCCESS')\n")
         
     patch = PatchCandidate(

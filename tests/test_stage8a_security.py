@@ -109,10 +109,16 @@ def test_workspace_isolation(repo_root, monkeypatch):
     
     assert client.backend.capabilities().workspace_isolation == "ENFORCED"
 
-def test_fail_closed_untrusted_repository(repo_root):
+def test_fail_closed_untrusted_repository(repo_root, monkeypatch):
     from backend.sandbox.client import SandboxClient
     from backend.sandbox.capabilities import RepositoryTrust
     from backend.models.schemas import PatchCandidate
+    from backend.sandbox.secure_backend import ContainerRuntimeProbe
+
+    monkeypatch.setattr(
+        ContainerRuntimeProbe, "detect_runtime",
+        lambda self: (False, "NONE", {"error": "Mocked: container daemon not present"})
+    )
     
     policy = SandboxPolicy(allowed_commands=["python"])
     
@@ -183,10 +189,16 @@ def test_direct_backend_protection_untrusted():
     assert "hello" not in res.stdout
     assert res.backend_provenance["security_level"] == "DEVELOPMENT_ONLY"
 
-def test_orchestrator_gate_prevents_execute_call(repo_root):
+def test_orchestrator_gate_prevents_execute_call(repo_root, monkeypatch):
     from backend.sandbox.client import SandboxClient
     from backend.models.schemas import PatchCandidate
+    from backend.sandbox.secure_backend import ContainerRuntimeProbe
     from unittest.mock import MagicMock
+
+    monkeypatch.setattr(
+        ContainerRuntimeProbe, "detect_runtime",
+        lambda self: (False, "NONE", {"error": "Mocked: container daemon not present"})
+    )
     
     policy = SandboxPolicy()
     client = SandboxClient(policy, repo_root)

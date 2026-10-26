@@ -34,7 +34,7 @@ def test_minimal_e2e_verification(tmp_path):
     
     # 5. Sandbox policy
     policy = SandboxPolicy(allowed_commands=["python"])
-    client = SandboxClient(str(tmp_path), policy)
+    client = SandboxClient(policy, str(tmp_path))
     
     # 6. Execution (We just use TRUSTED_DEVELOPMENT for testing E2E locally)
     with open(tmp_path / "test_main.py", "w") as f:

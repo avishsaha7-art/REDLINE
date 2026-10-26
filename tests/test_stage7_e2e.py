@@ -11,7 +11,8 @@ from backend.models.deterministic_provider import DeterministicTestProvider
 def repo_root(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
-    (repo / "main.py").write_text("a\n", encoding="utf-8")
+    (repo / "main.py").write_text("a\n", encoding="utf-8", newline="\n")
+    (repo / "test_main.py").write_text("print('1 passed')\n", encoding="utf-8", newline="\n")
     return str(repo)
 
 def test_stage7_e2e_pipeline(repo_root, monkeypatch):

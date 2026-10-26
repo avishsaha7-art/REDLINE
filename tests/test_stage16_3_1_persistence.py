@@ -51,7 +51,8 @@ def make_test_receipt(run_id: str, task_id: str, verdict: VerificationStatus = V
 
 
 @pytest.fixture
-def temp_db(tmp_path):
+def temp_db(tmp_path, monkeypatch):
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     db_file = str(tmp_path / "test_redline.db")
     db = Database(db_path=db_file)
     repo = SQLiteRunRepository(database=db)

@@ -39,8 +39,12 @@ client = TestClient(app)
 def clean_store(monkeypatch):
     monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     reset_run_store()
+    from backend.models.deterministic_provider import DeterministicTestProvider
+    from backend.api.routes.runs import set_model_provider
+    set_model_provider(DeterministicTestProvider())
     yield
     reset_run_store()
+    set_model_provider(None)
 
 def create_base_contract(task_id: str = "T-14-3") -> TaskContract:
     return TaskContract(

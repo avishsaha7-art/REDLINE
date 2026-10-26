@@ -9,7 +9,9 @@ from backend.agents.architect import ArchitectAgent
 from backend.agents.builder import BuilderAgent
 
 # --- Provider Tests ---
-def test_nebius_configuration_missing_key():
+def test_nebius_configuration_missing_key(monkeypatch):
+    # Clear any env var leakage
+    monkeypatch.delenv("NEBIUS_API_KEY", raising=False)
     with pytest.raises(ModelProviderError) as exc_info:
         provider = NebiusProvider(api_key="", default_model="test-model")
         provider.generate([{"role": "user", "content": "hi"}])

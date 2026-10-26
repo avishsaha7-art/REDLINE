@@ -68,6 +68,7 @@ CREATE INDEX IF NOT EXISTS idx_run_events_run_id_seq ON run_events(run_id, event
 CREATE INDEX IF NOT EXISTS idx_run_patches_run_id ON run_patches(run_id);
 CREATE INDEX IF NOT EXISTS idx_run_artifacts_run_id ON run_artifacts(run_id);
 CREATE INDEX IF NOT EXISTS idx_run_artifacts_created_at ON run_artifacts(created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS uidx_run_artifacts_run_art ON run_artifacts(run_id, artifact_id);
 """
 
 def get_default_db_path() -> str:
@@ -105,6 +106,53 @@ class Database:
             conn.execute("PRAGMA journal_mode = WAL;")
             conn.execute("PRAGMA synchronous = NORMAL;")
 
+    def _migrate_schema(self, conn: sqlite3.Connection):
+        """
+        Backward-compatible schema migration.
+        Ensures run_artifacts has composite PRIMARY KEY (run_id, artifact_id)
+        and matching UNIQUE index for ON CONFLICT(run_id, artifact_id).
+        Preserves all existing data.
+        """
+        cur = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='run_artifacts'")
+        if not cur.fetchone():
+            return
+
+        cols = conn.execute("PRAGMA table_info(run_artifacts)").fetchall()
+        pk_cols = [c[1] for c in cols if c[5] > 0]
+        if "run_id" not in pk_cols or len(pk_cols) < 2:
+            # Table has legacy single-column primary key (artifact_id).
+            # Migrate to composite primary key (run_id, artifact_id) preserving all data.
+            conn.execute("ALTER TABLE run_artifacts RENAME TO _run_artifacts_legacy")
+            conn.execute("""
+                CREATE TABLE run_artifacts (
+                    artifact_id TEXT NOT NULL,
+                    run_id TEXT NOT NULL REFERENCES runs(run_id) ON DELETE CASCADE,
+                    artifact_type TEXT NOT NULL,
+                    media_type TEXT NOT NULL,
+                    storage_path TEXT NOT NULL,
+                    size_bytes INTEGER NOT NULL,
+                    sha256 TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    lineage_ref TEXT,
+                    metadata_json TEXT,
+                    PRIMARY KEY (run_id, artifact_id)
+                )
+            """)
+            conn.execute("""
+                INSERT OR IGNORE INTO run_artifacts (
+                    artifact_id, run_id, artifact_type, media_type, storage_path,
+                    size_bytes, sha256, created_at, lineage_ref, metadata_json
+                )
+                SELECT
+                    artifact_id, run_id, artifact_type, media_type, storage_path,
+                    size_bytes, sha256, created_at, lineage_ref, metadata_json
+                FROM _run_artifacts_legacy
+            """)
+            conn.execute("DROP TABLE _run_artifacts_legacy")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_run_artifacts_run_id ON run_artifacts(run_id)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_run_artifacts_created_at ON run_artifacts(created_at DESC)")
+            conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS uidx_run_artifacts_run_art ON run_artifacts(run_id, artifact_id)")
+
     def _initialize(self):
         if self.db_path != ":memory:":
             parent_dir = os.path.dirname(os.path.abspath(self.db_path))
@@ -112,12 +160,14 @@ class Database:
                 os.makedirs(parent_dir, exist_ok=True)
             with self.connection() as conn:
                 conn.executescript(SCHEMA_SQL)
+                self._migrate_schema(conn)
         else:
             with self._lock:
                 if self._memory_conn is None:
                     self._memory_conn = sqlite3.connect(":memory:", check_same_thread=False)
                     self._configure_connection(self._memory_conn)
                     self._memory_conn.executescript(SCHEMA_SQL)
+                    self._migrate_schema(self._memory_conn)
 
     @contextmanager
     def connection(self):

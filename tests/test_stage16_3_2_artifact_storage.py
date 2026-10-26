@@ -66,7 +66,8 @@ def make_test_receipt(run_id: str, task_id: str, verdict: VerificationStatus = V
 
 
 @pytest.fixture
-def temp_storage(tmp_path):
+def temp_storage(tmp_path, monkeypatch):
+    monkeypatch.setenv("REDLINE_ENABLE_LOCAL_BACKEND", "1")
     db_file = str(tmp_path / "test_artifacts.db")
     artifacts_dir = str(tmp_path / "artifacts_root")
     os.makedirs(artifacts_dir, exist_ok=True)

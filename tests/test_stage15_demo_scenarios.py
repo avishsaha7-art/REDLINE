@@ -279,12 +279,16 @@ def test_scenario_c_rejected_or_inconclusive_candidate():
         exec_module.AttackVerificationEngine = old_engine
 
 
-def test_scenario_d_sandbox_security_boundary():
+def test_scenario_d_sandbox_security_boundary(monkeypatch):
     """
     Scenario D — Sandbox security boundary:
     An untrusted repository must be blocked by the development backend.
     The system must not silently fall back to unsafe execution.
     """
+    monkeypatch.setattr(
+        "backend.sandbox.secure_backend.ContainerRuntimeProbe.detect_runtime",
+        lambda self: (False, "NONE", {"error": "Mocked: container daemon not present"})
+    )
     contract_payload = {
         "task_id": "DEMO-TASK-D",
         "repository_id": "untrusted-external-repo-demo",
