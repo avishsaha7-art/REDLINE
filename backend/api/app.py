@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from backend.api.routes import runs, benchmark
+from backend.api.routes import runs, benchmark, repositories, projects
 from backend.api.cors import get_allowed_origins, ALLOWED_METHODS, ALLOWED_HEADERS
 from backend.config import load_dotenv_if_present
 
@@ -53,4 +53,16 @@ app.add_middleware(
 
 app.include_router(runs.router, prefix="/api/v1/runs")
 app.include_router(benchmark.router, prefix="/api/v1/benchmark")
+app.include_router(repositories.router, prefix="/api/v1/repositories")
+app.include_router(projects.router, prefix="/api/v1/projects")
 
+
+@app.get("/api/v1/health")
+@app.get("/health")
+def health():
+    import datetime
+    return {
+        "status": "healthy",
+        "service": "REDLINE API",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
+    }

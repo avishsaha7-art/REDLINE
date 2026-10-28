@@ -87,7 +87,16 @@ class AttackVerificationEngine:
                         subprocess.run(["git", "init"], cwd=exec_dir, check=True, capture_output=True)
                         subprocess.run(["git", "config", "core.autocrlf", "false"], cwd=exec_dir, check=True, capture_output=True)
                         subprocess.run(["git", "add", "-A"], cwd=exec_dir, check=True, capture_output=True)
-                        subprocess.run(["git", "apply", "candidate.patch"], cwd=exec_dir, check=True, capture_output=True)
+                        try:
+                            subprocess.run(["git", "apply", "candidate.patch"], cwd=exec_dir, check=True, capture_output=True)
+                        except subprocess.CalledProcessError:
+                            r = subprocess.run(["git", "apply", "--recount", "--ignore-whitespace", "candidate.patch"], cwd=exec_dir, capture_output=True)
+                            if r.returncode != 0:
+                                from backend.sandbox.client import SandboxClient
+                                norm = SandboxClient._normalize_patch_diff(diff_text)
+                                with open(patch_file, "w", newline="\n", encoding="utf-8") as f:
+                                    f.write(norm)
+                                subprocess.run(["git", "apply", "--recount", "--ignore-whitespace", "candidate.patch"], cwd=exec_dir, check=True, capture_output=True)
                     except Exception:
                         pass
 
@@ -142,6 +151,10 @@ class AttackVerificationEngine:
                 timeout_seconds=min(30, max(1, req.resource_policy.max_runtime_ms // 1000))
             )
             res = self.backend.execute(backend_req, req.run_id)
+            if not getattr(res, "backend_provenance", None):
+                res.backend_provenance = {}
+            if "backend" not in res.backend_provenance:
+                res.backend_provenance["backend"] = type(self.backend).__name__
         finally:
             if cleanup_temp and exec_dir:
                 def _onerror(func, p, exc_info):

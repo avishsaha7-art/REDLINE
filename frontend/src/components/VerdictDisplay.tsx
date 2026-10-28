@@ -42,6 +42,22 @@ export function getVerdictVisuals(verdict: string | null, lifecycleState?: strin
     bgClass = 'bg-amber-950/40 border-amber-500/80';
     textClass = 'text-amber-300';
     icon = '⚠';
+  } else if (verdict === 'POLICY_BLOCKED') {
+    bgClass = 'bg-rose-950/50 border-rose-600/90';
+    textClass = 'text-rose-300';
+    icon = '🛡️';
+  } else if (verdict === 'TIMEOUT') {
+    bgClass = 'bg-orange-950/50 border-orange-600/90';
+    textClass = 'text-orange-300';
+    icon = '⏱️';
+  } else if (verdict === 'RESOURCE_LIMIT') {
+    bgClass = 'bg-purple-950/50 border-purple-600/90';
+    textClass = 'text-purple-300';
+    icon = '🛑';
+  } else if (verdict === 'SANDBOX_FAILURE' || verdict === 'EXECUTION_FAILURE') {
+    bgClass = 'bg-red-950/60 border-red-700';
+    textClass = 'text-red-300';
+    icon = '⛔';
   }
 
   // Detect state vs verdict mismatch (technical debt handling)
@@ -123,6 +139,15 @@ export const VerdictDisplay: React.FC<Props> = ({ verdict, error, lifecycleState
           <span>
             Pipeline lifecycle state reached <code>VERIFIED</code>, but authoritative verification concluded <code>INCONCLUSIVE</code>. 
             Code soundness is NOT certified. Deterministic verdict remains authoritative.
+          </span>
+        </div>
+      )}
+
+      {verdict === 'POLICY_BLOCKED' && (
+        <div className="mt-4 p-3 bg-rose-950/60 text-rose-200 border border-rose-800 rounded text-xs text-left">
+          <strong className="block font-bold mb-0.5 text-rose-300">🛡️ Policy Blocked Notice:</strong>
+          <span>
+            Untrusted code execution was safely halted by the backend sandbox policy. Remote and untrusted workloads cannot execute on host development backends.
           </span>
         </div>
       )}

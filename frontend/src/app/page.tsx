@@ -91,6 +91,7 @@ export function isRequestCurrent(requestRunId: string, activeRunId: string): boo
 
 export default function Home() {
   const [runId, setRunId] = useState<string>('');
+  const [initialRepoId, setInitialRepoId] = useState<string>('');
   const [status, setStatus] = useState<RunStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -252,6 +253,23 @@ export default function Home() {
     };
   }, [runId, status]);
 
+  // Parse query parameters on client mount (e.g. ?repoId=... from /repositories)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const paramRepo = params.get('repoId');
+      if (paramRepo) {
+        setInitialRepoId(paramRepo);
+      }
+      const paramRun = params.get('runId');
+      if (paramRun) {
+        const trimmedRun = paramRun.trim();
+        setRunId(trimmedRun);
+        fetchStatusForId(trimmedRun);
+      }
+    }
+  }, [fetchStatusForId]);
+
   // Global unmount cleanup
   useEffect(() => {
     return () => {
@@ -296,7 +314,7 @@ export default function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column (5 cols): Intake & History */}
         <section className="lg:col-span-5 space-y-6" aria-label="Run Creation and Selector Controls">
-          <RunCreationForm onRunCreated={handleRunCreated} />
+          <RunCreationForm onRunCreated={handleRunCreated} initialRepoId={initialRepoId} />
           
           <div className="border border-[#222430] p-5 rounded bg-[#0d0e12] card-laser-border shadow-lg text-[#f4f4f5]" role="search" aria-label="Run Inspection Search">
             <h2 className="text-sm font-bold text-[#f4f4f5] mb-2 uppercase tracking-wide font-mono">Inspect Run by ID</h2>

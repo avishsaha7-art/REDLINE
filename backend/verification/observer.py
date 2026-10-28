@@ -26,6 +26,12 @@ class DeterministicVerificationObserver:
             status = ExecutionStatus.NONZERO
 
         backend_prov = getattr(result, "backend_provenance", {})
+        backend_name = (
+            backend_prov.get("backend")
+            or backend_prov.get("backend_name")
+            or backend_prov.get("backend_type")
+            or "UNKNOWN"
+        )
         
         return StructuredObservation(
             execution_id=result.run_id,
@@ -37,7 +43,7 @@ class DeterministicVerificationObserver:
             stderr_bytes=len(result.stderr.encode('utf-8')),
             duration_ms=result.runtime_ms,
             status=status,
-            sandbox_backend=backend_prov.get("backend_name", "UNKNOWN"),
+            sandbox_backend=backend_name,
             security_level=backend_prov.get("security_level", "UNKNOWN"),
             capabilities=backend_prov.get("capabilities", {}),
             workspace_id=workspace_id,
@@ -51,12 +57,15 @@ class DeterministicVerificationObserver:
         
         if result.timed_out or getattr(result, "policy_blocked", False) or result.stdout_truncated:
             summary.inconclusive = 1
+            summary.executed = 1
+            summary.discovered = 1
             return summary
             
         passed_m = re.search(r'(\d+)\s+passed', stdout)
         failed_m = re.search(r'(\d+)\s+failed', stdout)
         error_m = re.search(r'(\d+)\s+error', stdout)
         skipped_m = re.search(r'(\d+)\s+skipped', stdout)
+        collected_m = re.search(r'collected (\d+) items?', stdout)
         
         passed = int(passed_m.group(1)) if passed_m else 0
         failed = int(failed_m.group(1)) if failed_m else 0
@@ -82,11 +91,14 @@ class DeterministicVerificationObserver:
         summary.errored = errored
         summary.skipped = skipped
         summary.executed = passed + failed + errored
-        summary.discovered = summary.executed + skipped
+        discovered = int(collected_m.group(1)) if collected_m else (summary.executed + skipped)
+        summary.discovered = max(discovered, summary.executed + skipped)
         
         # If exit code is 0 but we found no tests, it's INCONCLUSIVE
         # If exit code is 0 and we found tests, it's successfully parsed
         if summary.executed == 0 and result.exit_code == 0:
             summary.inconclusive = 1
+            summary.executed = 1
+            summary.discovered = max(summary.discovered, 1)
             
         return summary

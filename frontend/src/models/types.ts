@@ -55,6 +55,28 @@ export interface TaskContract {
   acceptance_criteria?: string[];
   allowed_scope?: string[];
   resource_budget?: ResourceBudget;
+  repository_trust?: string;
+  repository_url?: string;
+  commit_sha?: string;
+}
+
+export interface ImportRepositoryRequest {
+  repository_url: string;
+  commit_sha: string;
+  resource_budget?: Partial<ResourceBudget>;
+}
+
+export interface RepositoryResponse {
+  repository_id: string;
+  trust: string;
+  repository_url?: string | null;
+  commit_sha?: string | null;
+  snapshot_hash?: string | null;
+  file_manifest_hash?: string | null;
+  file_count: number;
+  total_bytes: number;
+  is_quarantined: boolean;
+  registered_at: string;
 }
 
 export interface PatchCandidate {
@@ -253,4 +275,87 @@ export interface RunDiff {
   patch_id?: string | null;
   diff?: string | null;
   changed_files: string[];
+}
+
+// Stage 3 Project Workspace & Chat Types
+export interface ProjectFileEntry {
+  path: string;
+  content?: string;
+  size_bytes?: number;
+  sha256?: string;
+}
+
+export interface LocalProjectImportRequest {
+  name: string;
+  files: ProjectFileEntry[];
+  resource_budget?: Partial<ResourceBudget>;
+}
+
+export interface ProjectRecord {
+  project_id: string;
+  name: string;
+  root_path: string;
+  trust: string;
+  snapshot_hash: string;
+  file_manifest_hash: string;
+  file_count: number;
+  total_bytes: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectFileContentResponse {
+  path: string;
+  content: string;
+  size_bytes: number;
+  sha256: string;
+}
+
+export interface ConversationRecord {
+  conversation_id: string;
+  project_id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MessageRecord {
+  message_id: string;
+  conversation_id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  mentioned_files: string[];
+  proposal_id?: string | null;
+  timestamp: string;
+}
+
+export interface ProposalRecord {
+  proposal_id: string;
+  project_id: string;
+  conversation_id?: string | null;
+  status: 'PENDING' | 'APPLIED' | 'REJECTED';
+  description: string;
+  diff: string;
+  diff_sha256: string;
+  changed_files: string[];
+  proposed_content: Record<string, string>;
+  created_at: string;
+  resolved_at?: string | null;
+}
+
+export interface ChatResponse {
+  conversation_id: string;
+  message_id: string;
+  role: string;
+  content: string;
+  mentioned_files: string[];
+  proposal?: ProposalRecord | null;
+}
+
+export interface ProjectVerifyResponse {
+  run_id: string;
+  task_id: string;
+  project_id: string;
+  trust: string;
+  status: string;
 }

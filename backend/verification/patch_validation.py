@@ -25,7 +25,7 @@ def extract_paths_from_diff(diff: str) -> set:
                 path = path[2:]
                 
             paths.add(path)
-        elif line.startswith("@@ "):
+        elif re.match(r"^@@\s+-\d+(?:,\d+)?\s+\+\d+(?:,\d+)?\s+@@", line.strip()):
             has_valid_hunk = True
 
     if diff.strip() and not has_valid_hunk:
@@ -74,6 +74,8 @@ def validate_patch(patch: PatchCandidate, task: TaskContract) -> bool:
     else:
         if not patch.diff.startswith("--- "):
             raise ValueError("Malformed patch format")
+        if not any(l.startswith("+++ ") for l in patch.diff.splitlines()):
+            raise ValueError("Malformed patch format: Missing target header")
         actual_diff_paths = extract_paths_from_diff(patch.diff)
         
     # Diff/Metadata mismatch

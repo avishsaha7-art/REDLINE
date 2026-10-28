@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import List, Dict, Optional, Any
 from enum import Enum
 import hashlib
@@ -78,6 +78,23 @@ class TestResultSummary(BaseModel):
     inconclusive: int = 0
     observations: List[TestObservation] = Field(default_factory=list)
 
+    @model_validator(mode="after")
+    def validate_arithmetic_consistency(self):
+        # Auto-adjust discovered if not explicitly set
+        if "discovered" not in self.model_fields_set:
+            self.discovered = self.executed + self.skipped
+        elif self.discovered < self.executed + self.skipped:
+            raise ValueError(
+                f"Contradictory test counts: discovered ({self.discovered}) < executed ({self.executed}) + skipped ({self.skipped})"
+            )
+
+        expected_executed = self.passed + self.failed + self.errored + self.inconclusive
+        if self.executed != expected_executed:
+            raise ValueError(
+                f"Inconsistent test counts: executed ({self.executed}) != passed ({self.passed}) + failed ({self.failed}) + errored ({self.errored}) + inconclusive ({self.inconclusive})"
+            )
+        return self
+
 class RegressionSummary(BaseModel):
     newly_failing: List[str] = Field(default_factory=list)
     newly_passing: List[str] = Field(default_factory=list)
@@ -107,9 +124,13 @@ class Counterexample(BaseModel):
     oracle_type: OracleType
     execution_id: str
     evidence_hash: str
-    
+    patch_id: Optional[str] = None
+    target_file: Optional[str] = None
+    workspace_id: Optional[str] = None
+    snapshot_hash: Optional[str] = None
+
     def hash(self) -> str:
-        s = f"{self.counterexample_id}:{self.invariant_id}:{self.execution_id}:{self.input_data}:{self.observed_output}"
+        s = f"{self.counterexample_id}:{self.invariant_id}:{self.execution_id}:{self.input_data}:{self.observed_output}:{self.patch_id or ''}:{self.target_file or ''}"
         return hashlib.sha256(s.encode()).hexdigest()
 
 class OracleResult(BaseModel):
@@ -134,7 +155,7 @@ class VerificationResult(BaseModel):
     repository_snapshot_hash: str
     patch_hash: str
     verified_scope: str
-    
+
     def hash(self) -> str:
         s = f"{self.status.value}:{self.repository_snapshot_hash}:{self.patch_hash}"
         return hashlib.sha256(s.encode()).hexdigest()

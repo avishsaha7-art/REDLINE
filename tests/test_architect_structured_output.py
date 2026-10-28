@@ -263,3 +263,20 @@ def test_evidence_receipt_integrity_preserved():
     receipt = orch.evidence_receipt
     assert receipt is not None
     assert verify_receipt_integrity(receipt) is True
+
+
+def test_architect_plan_normalizes_list_objective_and_string_file_fields():
+    raw_payload = {
+        "objective": ["Fix division-by-zero bug", "and improve input checks."],
+        "files_to_inspect": "src/calculator.py",
+        "files_to_modify": "src/calculator.py",
+        "implementation_steps": ["step 1"],
+        "acceptance_criteria": ["criterion 1"],
+        "constraints": ["constraint 1"],
+        "risks": ["risk 1"],
+        "expected_tests": ["test 1"],
+    }
+    plan = ArchitectPlan(**raw_payload)
+    assert plan.objective == "Fix division-by-zero bug and improve input checks."
+    assert plan.files_to_inspect == ["src/calculator.py"]
+    assert plan.files_to_modify == ["src/calculator.py"]

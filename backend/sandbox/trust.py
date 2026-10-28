@@ -94,7 +94,11 @@ def resolve_repository_trust(repository_id: str, requested_trust: Optional[str] 
     # If explicitly declared UNTRUSTED, always respect untrusted status (never force trust)
     if requested_trust == RepositoryTrust.UNTRUSTED.value or requested_trust == "UNTRUSTED":
         return RepositoryTrust.UNTRUSTED
-        
+
+    # Any remote, quarantined, or imported project repository is strictly UNTRUSTED by architectural invariant
+    if clean_repo.startswith("repo-remote-") or clean_repo.startswith("project-") or clean_repo.startswith("repo-local-"):
+        return RepositoryTrust.UNTRUSTED
+
     # Check if repository_id is in the authorized trusted repositories registry
     if clean_repo in trusted_repos:
         # If requested_trust is provided but malformed/unexpected (e.g., "SUPERUSER", "ADMIN", etc.),

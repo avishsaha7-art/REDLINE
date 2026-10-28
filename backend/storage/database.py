@@ -69,6 +69,56 @@ CREATE INDEX IF NOT EXISTS idx_run_patches_run_id ON run_patches(run_id);
 CREATE INDEX IF NOT EXISTS idx_run_artifacts_run_id ON run_artifacts(run_id);
 CREATE INDEX IF NOT EXISTS idx_run_artifacts_created_at ON run_artifacts(created_at DESC);
 CREATE UNIQUE INDEX IF NOT EXISTS uidx_run_artifacts_run_art ON run_artifacts(run_id, artifact_id);
+
+CREATE TABLE IF NOT EXISTS projects (
+    project_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    root_path TEXT NOT NULL,
+    trust TEXT NOT NULL,
+    snapshot_hash TEXT NOT NULL,
+    file_manifest_hash TEXT NOT NULL,
+    file_count INTEGER NOT NULL DEFAULT 0,
+    total_bytes INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS project_conversations (
+    conversation_id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS project_messages (
+    message_id TEXT PRIMARY KEY,
+    conversation_id TEXT NOT NULL REFERENCES project_conversations(conversation_id) ON DELETE CASCADE,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    mentioned_files_json TEXT NOT NULL DEFAULT '[]',
+    proposal_id TEXT,
+    timestamp TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS project_proposals (
+    proposal_id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    conversation_id TEXT,
+    status TEXT NOT NULL,
+    description TEXT NOT NULL,
+    diff TEXT NOT NULL,
+    diff_sha256 TEXT NOT NULL,
+    changed_files_json TEXT NOT NULL,
+    proposed_content_json TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    resolved_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_project_conversations_proj_id ON project_conversations(project_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_project_messages_conv_id ON project_messages(conversation_id, timestamp ASC);
+CREATE INDEX IF NOT EXISTS idx_project_proposals_proj_id ON project_proposals(project_id, created_at DESC);
 """
 
 def get_default_db_path() -> str:
@@ -79,7 +129,7 @@ def get_default_db_path() -> str:
     env_path = os.environ.get("REDLINE_DB_PATH")
     if env_path:
         return env_path
-    
+
     # Resolve relative to repo root
     repo_root = os.environ.get("REDLINE_REPO_ROOT")
     if not repo_root:
@@ -218,6 +268,12 @@ def get_database(db_path: Optional[str] = None) -> Database:
         if _global_database is None:
             _global_database = Database()
         return _global_database
+
+def set_database(database: Optional[Database]) -> None:
+    """Sets or overrides the global Database singleton."""
+    global _global_database
+    with _db_lock:
+        _global_database = database
 
 def reset_global_database():
     """Resets the global Database singleton (used in test teardown)."""

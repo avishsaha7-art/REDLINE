@@ -31,9 +31,13 @@ class Orchestrator:
         self.last_test_summary = None
         self.last_test_observation = None
         self.last_test_execution_result = None
+        from backend.sandbox.capabilities import RepositoryTrust
         from backend.sandbox.trust import resolve_repository_trust
-        trust_val = getattr(self.task_contract, "repository_trust", None)
-        self.repository_trust = resolve_repository_trust(self.task_contract.repository_id, trust_val).value
+        if getattr(self.task_contract, "repository_url", None):
+            self.repository_trust = RepositoryTrust.UNTRUSTED.value
+        else:
+            trust_val = getattr(self.task_contract, "repository_trust", None)
+            self.repository_trust = resolve_repository_trust(self.task_contract.repository_id, trust_val).value
 
     def _resolve_repo_root(self) -> str:
         import os
@@ -41,13 +45,21 @@ class Orchestrator:
             return os.path.abspath(self.repo_root)
         if os.environ.get("REDLINE_REPO_ROOT") and os.path.isdir(os.environ["REDLINE_REPO_ROOT"]):
             return os.path.abspath(os.environ["REDLINE_REPO_ROOT"])
-        fixture_dir = os.path.join("data", "fixtures", self.task_contract.repository_id)
-        if os.path.isdir(fixture_dir):
-            return os.path.abspath(fixture_dir)
-        default_fixture = os.path.join("data", "fixtures", "repo-int-1")
-        if os.path.isdir(default_fixture):
-            return os.path.abspath(default_fixture)
-        return os.getcwd()
+
+        from backend.sandbox.registry import get_repository_registry
+        target = get_repository_registry().resolve_target(self.task_contract.repository_id)
+        if target and os.path.isdir(target.repo_root):
+            return os.path.abspath(target.repo_root)
+
+        repo_id = self.task_contract.repository_id
+        if repo_id and not any(c in repo_id for c in ("/", "\\", ":", "%", "..")):
+            fixture_dir = os.path.join("data", "fixtures", repo_id)
+            if os.path.isdir(fixture_dir):
+                return os.path.abspath(fixture_dir)
+
+        # Fail closed: reject unknown target rather than silently falling back to repo-int-1 or cwd
+        raise ValueError(f"Unknown repository target '{repo_id}'. Target must be registered before verification.")
+
 
     def _resolve_test_command(self, repo_root: str) -> list[str]:
         import os
@@ -58,7 +70,7 @@ class Orchestrator:
         if os.path.exists(os.path.join(repo_root, "test_main.py")):
             return ["python", "test_main.py"]
         if os.path.exists(os.path.join(repo_root, "pytest.ini")) or os.path.isdir(os.path.join(repo_root, "tests")):
-            return ["python", "-m", "pytest"]
+            return ["python", "-m", "pytest", "-o", "pythonpath=."]
         return ["python", "test_main.py"]
 
     def run(self) -> RunState:
@@ -82,7 +94,16 @@ class Orchestrator:
                 from backend.orchestrator.repository_ingestion import discover_repository
                 import os
                 
-                repo_root = self._resolve_repo_root()
+                try:
+                    repo_root = self._resolve_repo_root()
+                except ValueError as exc:
+                    self.state_machine.events.record_event("REPOSITORY_RESOLUTION_FAILED", {
+                        "repository_id": self.task_contract.repository_id,
+                        "reason": str(exc)
+                    })
+                    self.state_machine.advance(OperationalResult.INVALID_REPOSITORY)
+                    break
+
                 ingestion_result = discover_repository(repo_root, self.task_contract, time.time())
                 
                 self.untrusted_context = ingestion_result.to_untrusted_context_string(self.task_contract.resource_budget)
@@ -120,12 +141,13 @@ class Orchestrator:
             elif state == RunState.BUILD:
                 try:
                     untrusted_context = getattr(self, "untrusted_context", "No file content loaded for Builder stub yet.")
-                    self.patch_candidate = self.builder.build(self.task_contract, self.architect_plan, untrusted_context)
+                    build_res = self.builder.build(self.task_contract, self.architect_plan, untrusted_context)
                     
-                    if isinstance(self.patch_candidate, OperationalResult):
-                        self.state_machine.events.record_event("PATCH_POLICY_REJECTED", {"reason": self.patch_candidate.value})
+                    if isinstance(build_res, OperationalResult):
+                        self.state_machine.events.record_event("PATCH_POLICY_REJECTED", {"reason": build_res.value})
                         self.state_machine.advance(OperationalResult.POLICY_BLOCKED)
                     else:
+                        self.patch_candidate = build_res
                         try:
                             validate_patch(self.patch_candidate, self.task_contract)
                             self.state_machine.events.record_event("PATCH_CANDIDATE_VALIDATED", {"patch_id": self.patch_candidate.patch_id, "patch_hash": self.patch_candidate.diff_sha256})
@@ -229,7 +251,11 @@ class Orchestrator:
                         failure_reason="Git patch rejected or conflicted with workspace base",
                         oracle_type=VerificationOracleType.DETERMINISTIC_CONTRACT,
                         execution_id=exec_res.run_id,
-                        evidence_hash=exec_res.stderr_sha256 or hashlib.sha256(b"PATCH_APPLY_FAILED").hexdigest()
+                        evidence_hash=exec_res.stderr_sha256 or hashlib.sha256(b"PATCH_APPLY_FAILED").hexdigest(),
+                        patch_id=self.patch_candidate.patch_id if self.patch_candidate else None,
+                        target_file=self.patch_candidate.changed_files[0] if (self.patch_candidate and self.patch_candidate.changed_files) else None,
+                        workspace_id=getattr(self, "workspace_id", None),
+                        snapshot_hash=getattr(self, "snapshot_hash", None)
                     )
                     self.counterexamples.append(ce)
                     self.state_machine.events.record_event("COUNTEREXAMPLE_FOUND", {
@@ -248,7 +274,11 @@ class Orchestrator:
                         failure_reason=f"Tests failed with exit code {exec_res.exit_code} (failed={test_summary.failed}, errored={test_summary.errored})",
                         oracle_type=VerificationOracleType.DETERMINISTIC_CONTRACT,
                         execution_id=exec_res.run_id,
-                        evidence_hash=hashlib.sha256((exec_res.stdout + exec_res.stderr).encode()).hexdigest()
+                        evidence_hash=hashlib.sha256((exec_res.stdout + exec_res.stderr).encode()).hexdigest(),
+                        patch_id=self.patch_candidate.patch_id if self.patch_candidate else None,
+                        target_file=self.patch_candidate.changed_files[0] if (self.patch_candidate and self.patch_candidate.changed_files) else None,
+                        workspace_id=getattr(self, "workspace_id", None),
+                        snapshot_hash=getattr(self, "snapshot_hash", None)
                     )
                     self.counterexamples.append(ce)
                     self.state_machine.events.record_event("COUNTEREXAMPLE_FOUND", {
@@ -267,7 +297,11 @@ class Orchestrator:
                         failure_reason="Test execution produced no passing test evidence (inconclusive)",
                         oracle_type=VerificationOracleType.DETERMINISTIC_CONTRACT,
                         execution_id=exec_res.run_id,
-                        evidence_hash=hashlib.sha256((exec_res.stdout + exec_res.stderr).encode()).hexdigest()
+                        evidence_hash=hashlib.sha256((exec_res.stdout + exec_res.stderr).encode()).hexdigest(),
+                        patch_id=self.patch_candidate.patch_id if self.patch_candidate else None,
+                        target_file=self.patch_candidate.changed_files[0] if (self.patch_candidate and self.patch_candidate.changed_files) else None,
+                        workspace_id=getattr(self, "workspace_id", None),
+                        snapshot_hash=getattr(self, "snapshot_hash", None)
                     )
                     self.counterexamples.append(ce)
                     self.state_machine.events.record_event("COUNTEREXAMPLE_FOUND", {
@@ -325,12 +359,15 @@ class Orchestrator:
                         self.state_machine.advance(OperationalResult.POLICY_BLOCKED)
                         continue
                         
+                    from backend.sandbox.client import SandboxClient
+                    norm_diff = SandboxClient._normalize_patch_diff(repair_candidate.diff)
+
                     # Convert to PatchCandidate for deterministic loop
                     new_patch = PatchCandidate(
                         patch_id=repair_candidate.repair_id,
                         task_id=self.task_contract.task_id,
                         base_commit_or_snapshot=self.task_contract.base_commit_or_snapshot,
-                        diff=repair_candidate.diff,
+                        diff=norm_diff,
                         changed_files=repair_candidate.changed_files,
                         patch_metadata={
                             "agent": "Repairer", 
@@ -422,6 +459,14 @@ class Orchestrator:
                     if oracle_res.result == "FAIL":
                         any_fails = True
                         if ce:
+                            if getattr(ce, "patch_id", None) is None and getattr(self, "patch_candidate", None):
+                                ce.patch_id = self.patch_candidate.patch_id
+                            if getattr(ce, "target_file", None) is None and getattr(req, "target", None):
+                                ce.target_file = req.target
+                            if getattr(ce, "workspace_id", None) is None:
+                                ce.workspace_id = getattr(self, "workspace_id", "unknown")
+                            if getattr(ce, "snapshot_hash", None) is None:
+                                ce.snapshot_hash = getattr(self, "snapshot_hash", "unknown")
                             self.state_machine.events.record_event("COUNTEREXAMPLE_FOUND", {"counterexample_id": ce.counterexample_id})
                             self.counterexamples.append(ce)
                             
@@ -446,25 +491,10 @@ class Orchestrator:
                 if main_obs is None and hasattr(self, "last_test_observation"):
                     main_obs = self.last_test_observation
                     
-                # Accurately compute summary metrics including genuine test execution
-                last_test = getattr(self, "last_test_summary", None)
-                base_passed = last_test.passed if last_test else 0
-                base_failed = last_test.failed if last_test else 0
-                base_errored = last_test.errored if last_test else 0
-                base_executed = last_test.executed if last_test else 0
-                base_inconclusive = last_test.inconclusive if last_test else 0
-
-                failed_oracles = sum(1 for o in all_oracles if o.result == "FAIL")
-                passed_oracles = sum(1 for o in all_oracles if o.result == "PASS")
-                inconclusive_oracles = sum(1 for o in all_oracles if o.result == "INCONCLUSIVE")
-
-                test_summary = TestResultSummary(
-                    executed=base_executed + len(all_obs),
-                    passed=base_passed,
-                    failed=base_failed + failed_oracles,
-                    errored=base_errored,
-                    inconclusive=base_inconclusive + inconclusive_oracles,
-                )
+                # Preserve the genuine test summary from test execution
+                test_summary = getattr(self, "last_test_summary", None)
+                if test_summary is None:
+                    test_summary = TestResultSummary()
 
                 # REV-017: Aggregate security oracles into deterministic security verification
                 from backend.verification.security_models import SecurityResultAggregation, SecurityResultClassification
@@ -498,20 +528,22 @@ class Orchestrator:
                     invariants=[],
                     security_aggregation=security_agg,
                     oracle_results=all_oracles,
-                    counterexamples=self.counterexamples
+                    counterexamples=self.counterexamples,
+                    task_contract=self.task_contract
                 )
                 
                 # Build receipt with canonical snapshot hash (REV-007)
                 aggregator = EvidenceAggregator(self.task_contract, patch_lineage=self.patch_lineage)
                 provider_name = getattr(self.model_provider, "provider_name", getattr(self.model_provider, "provider", "test"))
                 model_name = getattr(self.model_provider, "default_model", getattr(self.model_provider, "model", "unknown"))
+                prov_backend = (getattr(main_obs, "sandbox_backend", None) if main_obs and getattr(main_obs, "sandbox_backend", None) != "UNKNOWN" else None) or type(backend).__name__
                 self.evidence_receipt = aggregator.build_receipt(
                     self.state_machine.run_id,
                     self.patch_candidate if self.patch_candidate else PatchCandidate(patch_id="none", task_id=self.task_contract.task_id, base_commit_or_snapshot="", diff=""),
                     self.verification_result,
                     self.selected_attacks,
                     {"provider": provider_name, "model": model_name},
-                    {"backend": type(backend).__name__},
+                    {"backend": prov_backend},
                     snapshot_hash=getattr(self, "snapshot_hash", None)
                 )
                             

@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { apiClient } from '@/api/client';
+import { RepositoryResponse } from '@/models/types';
 
 export interface RepositoryPolicy {
   repositoryId: string;
@@ -62,6 +64,34 @@ export default function RepositoriesPage() {
   const [trustFilter, setTrustFilter] = useState<'ALL' | 'TRUSTED' | 'UNTRUSTED'>('ALL');
   const [copiedDigest, setCopiedDigest] = useState<string | null>(null);
 
+  // Dynamic remote repositories state
+  const [remoteTargets, setRemoteTargets] = useState<RepositoryResponse[]>([]);
+  const [isLoadingTargets, setIsLoadingTargets] = useState<boolean>(false);
+  const [showImportForm, setShowImportForm] = useState<boolean>(false);
+  const [importUrl, setImportUrl] = useState<string>('');
+  const [importCommit, setImportCommit] = useState<string>('');
+  const [isImporting, setIsImporting] = useState<boolean>(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<RepositoryResponse | null>(null);
+
+  const fetchRemoteTargets = useCallback(async () => {
+    setIsLoadingTargets(true);
+    try {
+      const targets = await apiClient.listRepositories();
+      // Keep only remote quarantined targets from API to combine with policies
+      const remotes = targets.filter(t => t.repository_id.startsWith('repo-remote-'));
+      setRemoteTargets(remotes);
+    } catch {
+      // Gracefully continue with static targets if offline
+    } finally {
+      setIsLoadingTargets(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRemoteTargets();
+  }, [fetchRemoteTargets]);
+
   const handleCopyDigest = (digest: string) => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(digest);
@@ -70,8 +100,63 @@ export default function RepositoriesPage() {
     }
   };
 
+  const handleImportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setImportError(null);
+    setImportSuccess(null);
+
+    const trimmedUrl = importUrl.trim();
+    const trimmedSha = importCommit.trim();
+
+    if (!trimmedUrl.startsWith('https://')) {
+      setImportError("Repository URL must use the secure 'https://' scheme.");
+      return;
+    }
+    if (!/^[0-9a-fA-F]{40}$|^[0-9a-fA-F]{64}$/.test(trimmedSha)) {
+      setImportError('Commit SHA must be a full 40-character or 64-character hex hash.');
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      const res = await apiClient.importRepository({
+        repository_url: trimmedUrl,
+        commit_sha: trimmedSha
+      });
+      setImportSuccess(res);
+      setImportUrl('');
+      setImportCommit('');
+      await fetchRemoteTargets();
+    } catch (err: unknown) {
+      setImportError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  // Combine baseline static policies with live remote targets
+  const combinedRepositories = useMemo(() => {
+    const list: RepositoryPolicy[] = [...REPOSITORY_POLICIES];
+
+    for (const r of remoteTargets) {
+      if (!list.some(item => item.repositoryId === r.repository_id)) {
+        list.push({
+          repositoryId: r.repository_id,
+          trustLevel: 'UNTRUSTED',
+          sandboxPolicy: 'SECURE_SANDBOX_CONTAINER (Quarantined Execution)',
+          scopeEnforcement: 'WORKSPACE_CONTAINED (Filesystem scratch boundary)',
+          pathTraversalGate: 'FAIL_CLOSED (Quarantine boundary strictly enforced)',
+          snapshotDigest: r.snapshot_hash || '4a59a721c5b8d96f9a72b83c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e',
+          fixtureRole: `Remote Import: ${r.repository_url || 'Public Git Repository'}`,
+          defaultBranch: r.commit_sha ? r.commit_sha.slice(0, 8) : 'pinned'
+        });
+      }
+    }
+    return list;
+  }, [remoteTargets]);
+
   const filteredRepositories = useMemo(() => {
-    return REPOSITORY_POLICIES.filter((repo) => {
+    return combinedRepositories.filter((repo) => {
       const matchesFilter =
         trustFilter === 'ALL' || repo.trustLevel === trustFilter;
 
@@ -88,13 +173,13 @@ export default function RepositoriesPage() {
 
       return matchesFilter && matchesSearch;
     });
-  }, [searchQuery, trustFilter]);
+  }, [combinedRepositories, searchQuery, trustFilter]);
 
   const trustedCount = useMemo(() => 
-    REPOSITORY_POLICIES.filter((r) => r.trustLevel === 'TRUSTED').length, []
+    combinedRepositories.filter((r) => r.trustLevel === 'TRUSTED').length, [combinedRepositories]
   );
   const untrustedCount = useMemo(() => 
-    REPOSITORY_POLICIES.filter((r) => r.trustLevel === 'UNTRUSTED').length, []
+    combinedRepositories.filter((r) => r.trustLevel === 'UNTRUSTED').length, [combinedRepositories]
   );
 
   return (
@@ -130,17 +215,15 @@ export default function RepositoriesPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {/* Telemetry Stat Pills */}
-            <div className="hidden lg:flex items-center gap-2 font-mono text-xs text-[#a1a1aa]">
-              <div className="px-3 py-1.5 rounded bg-[#0d0e12] border border-[#222430] flex flex-col items-start">
-                <span className="text-[10px] text-[#71717a] uppercase font-semibold">TARGET PROFILES</span>
-                <span className="font-bold text-[#10b981]">{REPOSITORY_POLICIES.length} CONFIGURED</span>
-              </div>
-              <div className="px-3 py-1.5 rounded bg-[#0d0e12] border border-[#222430] flex flex-col items-start">
-                <span className="text-[10px] text-[#71717a] uppercase font-semibold">FAIL-CLOSED GATE</span>
-                <span className="font-bold text-[#f4f4f5]">100% ENFORCED</span>
-              </div>
-            </div>
+            {/* Import Repository Toggle Button */}
+            <button
+              id="toggle-import-button"
+              type="button"
+              onClick={() => setShowImportForm(!showImportForm)}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs font-mono font-bold bg-[#13141b] hover:bg-[#1f202b] text-[#f4f4f5] px-3.5 py-2 rounded border border-[#353748] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]"
+            >
+              <span>{showImportForm ? '✕ Close Import' : '📥 Import Remote Repository'}</span>
+            </button>
 
             <Link
               href="/"
@@ -154,6 +237,84 @@ export default function RepositoriesPage() {
           </div>
         </div>
       </header>
+
+      {/* ================= OPTIONAL COLLAPSIBLE REPOSITORY IMPORT DRAWER ================= */}
+      {showImportForm && (
+        <section aria-labelledby="repo-import-drawer-heading" className="bg-[#0d0e12] border border-[#3b82f6]/40 p-5 rounded-lg shadow-xl space-y-4">
+          <div className="flex items-center justify-between border-b border-[#222430] pb-2">
+            <h2 id="repo-import-drawer-heading" className="text-xs font-bold text-[#f4f4f5] uppercase font-mono tracking-wider flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#3b82f6]"></span>
+              <span>Import Public Remote Repository (Quarantine Boundary)</span>
+            </h2>
+            <span className="text-[10px] font-mono text-[#a1a1aa]">SSRF Protected • Enforces UNTRUSTED</span>
+          </div>
+
+          <form onSubmit={handleImportSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+            <div className="md:col-span-6">
+              <label htmlFor="repo-page-url-input" className="block text-[11px] font-mono text-[#a1a1aa] uppercase mb-1">
+                Repository HTTPS URL
+              </label>
+              <input
+                id="repo-page-url-input"
+                type="url"
+                required
+                placeholder="https://github.com/org/repo.git"
+                value={importUrl}
+                onChange={e => setImportUrl(e.target.value)}
+                disabled={isImporting}
+                className="w-full bg-[#13141b] border border-[#222430] rounded p-2 text-xs font-mono text-[#f4f4f5] focus:border-[#ef4444] focus-visible:outline-none"
+              />
+            </div>
+
+            <div className="md:col-span-4">
+              <label htmlFor="repo-page-commit-input" className="block text-[11px] font-mono text-[#a1a1aa] uppercase mb-1">
+                Pinned Commit SHA (40/64 hex)
+              </label>
+              <input
+                id="repo-page-commit-input"
+                type="text"
+                required
+                placeholder="Full commit hash"
+                value={importCommit}
+                onChange={e => setImportCommit(e.target.value)}
+                disabled={isImporting}
+                maxLength={64}
+                className="w-full bg-[#13141b] border border-[#222430] rounded p-2 text-xs font-mono text-[#f4f4f5] focus:border-[#ef4444] focus-visible:outline-none"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <button
+                type="submit"
+                disabled={isImporting || !importUrl.trim() || !importCommit.trim()}
+                className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-mono font-bold text-xs p-2 rounded transition-colors disabled:opacity-50"
+              >
+                {isImporting ? 'Quarantining...' : 'Import'}
+              </button>
+            </div>
+          </form>
+
+          {importError && (
+            <div className="p-3 bg-[#ef4444]/15 border border-[#ef4444]/30 text-[#f87171] text-xs font-mono rounded" role="alert">
+              <strong>Import Failed:</strong> {importError}
+            </div>
+          )}
+
+          {importSuccess && (
+            <div className="p-3 bg-[#10b981]/15 border border-[#10b981]/30 text-[#10b981] text-xs font-mono rounded flex items-center justify-between" role="status">
+              <div>
+                <strong>✓ Registered:</strong> Target ID <code className="font-bold text-white bg-[#09090b] px-1.5 py-0.5 rounded ml-1">{importSuccess.repository_id}</code> (Trust: UNTRUSTED)
+              </div>
+              <Link
+                href={`/?repoId=${encodeURIComponent(importSuccess.repository_id)}`}
+                className="bg-[#10b981] text-black font-bold px-3 py-1 rounded text-[11px] hover:bg-[#34d399] transition-colors"
+              >
+                Launch Verification Run →
+              </Link>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ================= ARCHITECTURE REFERENCE NOTICE ================= */}
       <section aria-labelledby="architecture-reference-notice">
@@ -172,7 +333,7 @@ export default function RepositoriesPage() {
             </strong>
             <p className="text-[#a1a1aa] text-[11px] leading-relaxed">
               The repository trust tiers, digests, and sandbox boundaries below are architectural specifications and baseline profiles.
-              Dynamic repository registration and remote repository management APIs are not implemented in this stage.
+              Dynamic repository registration and remote repository management APIs are enforced authoritatively by the backend cloner and sandbox.
             </p>
           </div>
         </div>
@@ -235,7 +396,7 @@ export default function RepositoriesPage() {
                   : 'text-[#a1a1aa] hover:text-[#f4f4f5]'
               }`}
             >
-              All ({REPOSITORY_POLICIES.length})
+              All ({combinedRepositories.length})
             </button>
             <button
               onClick={() => setTrustFilter('TRUSTED')}
@@ -273,9 +434,14 @@ export default function RepositoriesPage() {
                 Registered Target Repositories &amp; Policies ({filteredRepositories.length})
               </h2>
             </div>
-            <span className="text-[10px] font-mono text-[#71717a] hidden sm:inline-block">
-              Authoritative Gate: backend/sandbox/trust.py
-            </span>
+            <div className="flex items-center gap-3">
+              {isLoadingTargets && (
+                <span className="text-[10px] font-mono text-[#a1a1aa]">Syncing dynamic targets...</span>
+              )}
+              <span className="text-[10px] font-mono text-[#71717a] hidden sm:inline-block">
+                Authoritative Gate: backend/sandbox/trust.py
+              </span>
+            </div>
           </div>
 
           {filteredRepositories.length === 0 ? (

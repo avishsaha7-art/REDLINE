@@ -153,6 +153,7 @@ class LocalDevelopmentBackend(SandboxBackend):
                 stderr_sha256=hashlib.sha256(msg.encode()).hexdigest(),
                 policy_blocked=True,
                 backend_provenance={
+                    "backend": "LocalDevelopmentBackend",
                     "security_level": caps.security_level.value,
                     "trust": str(req.repository_trust),
                     "capabilities": caps.model_dump()
@@ -182,6 +183,7 @@ class LocalDevelopmentBackend(SandboxBackend):
                 stderr_sha256=hashlib.sha256(msg.encode()).hexdigest(),
                 policy_blocked=True,
                 backend_provenance={
+                    "backend": "LocalDevelopmentBackend",
                     "security_level": caps.security_level.value,
                     "trust": str(req.repository_trust),
                     "capabilities": caps.model_dump(),
@@ -191,6 +193,10 @@ class LocalDevelopmentBackend(SandboxBackend):
             )
 
         env = req.environment.copy()
+        if os.name == "nt":
+            for win_var in ("SYSTEMROOT", "SystemRoot", "WINDIR", "PATH", "PATHEXT", "TEMP", "TMP"):
+                if win_var in os.environ and win_var not in env:
+                    env[win_var] = os.environ[win_var]
         
         timed_out = False
         crashed = False
@@ -265,6 +271,7 @@ class LocalDevelopmentBackend(SandboxBackend):
         stdout_sha256 = hashlib.sha256(out_bytes).hexdigest()
         stderr_sha256 = hashlib.sha256(err_bytes).hexdigest()
         
+        caps = self.capabilities()
         return ExecutionResult(
             run_id=run_id,
             exit_code=exit_code if not crashed else -1,
@@ -276,7 +283,13 @@ class LocalDevelopmentBackend(SandboxBackend):
             timed_out=timed_out,
             crashed=crashed,
             stdout_truncated=out_trunc,
-            stderr_truncated=err_trunc
+            stderr_truncated=err_trunc,
+            backend_provenance={
+                "backend": "LocalDevelopmentBackend",
+                "security_level": caps.security_level.value,
+                "trust": str(req.repository_trust),
+                "capabilities": caps.model_dump()
+            }
         )
 
 # For backwards compatibility with existing code during migration:

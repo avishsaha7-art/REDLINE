@@ -345,15 +345,61 @@ async def create_run(contract: TaskContract):
     Backend remains authoritative: enforce resource budget caps,
     initialize run at INIT, and execute authoritative Orchestrator.
     """
+    try:
+        provider = get_model_provider()
+    except ModelProviderError as e:
+        # Sanitize error detail and fail closed with HTTP 400
+        raise HTTPException(
+            status_code=400,
+            detail=f"Model provider configuration error: {str(e)}"
+        )
+
+    # 1. Handle remote repository intake
+    if contract.repository_url:
+        from backend.sandbox.cloner import QuarantinedRepositoryCloner, ClonerError
+        cloner = QuarantinedRepositoryCloner()
+        commit_ref = contract.commit_sha or contract.base_commit_or_snapshot
+        try:
+            cloned_meta = cloner.import_repository(
+                url=contract.repository_url,
+                commit_sha=commit_ref,
+                budget=contract.resource_budget
+            )
+        except ClonerError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Remote repository import failed: {str(e)}"
+            )
+        contract = contract.model_copy(update={
+            "repository_id": cloned_meta.target_id,
+            "base_commit_or_snapshot": cloned_meta.commit_sha,
+            "commit_sha": cloned_meta.commit_sha,
+            "repository_trust": "UNTRUSTED"
+        })
+
+    # 2. Authoritative target existence check (fail closed against unknown targets)
+    from backend.sandbox.registry import get_repository_registry
+    target = get_repository_registry().resolve_target(contract.repository_id)
+    if not target:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown repository target '{contract.repository_id}'. Target must be registered before creating a verification run."
+        )
+
     run_id = f"run-{uuid.uuid4().hex[:8]}"
     
-    # Enforce authoritative backend policy on resource limits and trust
+    # 3. Enforce authoritative backend policy on resource limits and trust
     from backend.sandbox.trust import resolve_repository_trust
     authoritative_budget = enforce_resource_budget_limits(contract.resource_budget)
-    authoritative_trust = resolve_repository_trust(contract.repository_id, contract.repository_trust)
+    if contract.repository_url or contract.repository_id.startswith("repo-remote-"):
+        authoritative_trust_val = "UNTRUSTED"
+    else:
+        authoritative_trust = resolve_repository_trust(contract.repository_id, contract.repository_trust)
+        authoritative_trust_val = authoritative_trust.value
+
     authoritative_contract = contract.model_copy(update={
         "resource_budget": authoritative_budget,
-        "repository_trust": authoritative_trust.value
+        "repository_trust": authoritative_trust_val
     })
     
     now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -368,14 +414,6 @@ async def create_run(contract: TaskContract):
     )
     _runs[run_id] = run
     
-    try:
-        provider = get_model_provider()
-    except ModelProviderError as e:
-        # Sanitize error detail and fail closed with HTTP 400
-        raise HTTPException(
-            status_code=400,
-            detail=f"Model provider configuration error: {str(e)}"
-        )
     orchestrator = Orchestrator(run_id=run_id, task_contract=authoritative_contract, model_provider=provider)
     _orchestrators[run_id] = orchestrator
     
@@ -453,8 +491,8 @@ async def get_run_status(run_id: str):
         patch_lineage = run.evidence_receipt.patch_lineage
     elif orchestrator and getattr(orchestrator, "patch_lineage", None):
         patch_lineage = orchestrator.patch_lineage
-        
-    patch_cand = orchestrator.patch_candidate if orchestrator and getattr(orchestrator, "patch_candidate", None) else None
+    raw_patch = getattr(orchestrator, "patch_candidate", None) if orchestrator else None
+    patch_cand = raw_patch if isinstance(raw_patch, PatchCandidate) else None
     
     return RunStatusResponse(
         run_id=run.run_id,

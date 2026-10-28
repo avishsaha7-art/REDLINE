@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 from typing import List, Dict, Optional, Any
 import hashlib
 
@@ -42,7 +42,7 @@ class ResourceBudget(BaseModel):
 
 class TaskContract(BaseModel):
     task_id: str
-    repository_id: str
+    repository_id: str = ""
     base_commit_or_snapshot: str
     task_description: str
     constraints: List[str] = Field(default_factory=list)
@@ -50,6 +50,28 @@ class TaskContract(BaseModel):
     allowed_scope: List[str] = Field(default_factory=list)
     resource_budget: ResourceBudget = Field(default_factory=ResourceBudget)
     repository_trust: Optional[str] = None
+    repository_url: Optional[str] = None
+    commit_sha: Optional[str] = None
+
+    @model_validator(mode="after")
+    def _validate_repository_fields(self) -> "TaskContract":
+        if not self.repository_id and not self.repository_url:
+            raise ValueError("Either repository_id or repository_url must be provided.")
+        if self.repository_url:
+            url = self.repository_url.strip()
+            if not url.startswith("https://"):
+                raise ValueError("repository_url must use the 'https://' scheme.")
+            # Remote repositories are strictly UNTRUSTED by default; client cannot override
+            self.repository_trust = "UNTRUSTED"
+            if self.repository_id in ("repo-int-1", "repo-cons-1"):
+                raise ValueError("Cannot bind a remote repository URL to an authorized local fixture repository ID.")
+        elif self.repository_id:
+            rid = self.repository_id.strip()
+            if rid.startswith("http://") or rid.startswith("https://"):
+                raise ValueError("Repository URL must be provided in the 'repository_url' field, not 'repository_id'.")
+            if any(c in rid for c in ("..", "/", "\\")):
+                raise ValueError("Repository ID contains invalid or path traversal characters.")
+        return self
 
 class ArchitectPlan(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -63,12 +85,21 @@ class ArchitectPlan(BaseModel):
     risks: List[str] = Field(default_factory=list)
     expected_tests: List[str] = Field(default_factory=list)
 
+    @field_validator("objective", mode="before")
+    @classmethod
+    def _normalize_objective(cls, v: Any) -> Any:
+        if isinstance(v, list):
+            return " ".join(str(item) for item in v if item).strip()
+        return v
+
     @field_validator(
         "acceptance_criteria",
         "constraints",
         "risks",
         "implementation_steps",
         "expected_tests",
+        "files_to_inspect",
+        "files_to_modify",
         mode="before",
     )
     @classmethod

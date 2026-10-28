@@ -198,6 +198,14 @@ export default function ProjectsPage() {
             </div>
 
             <Link
+              href="/workspace"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs font-bold bg-[#181920] hover:bg-[#222430] text-white px-4 py-2 rounded border border-[#2f3242] transition-colors"
+            >
+              <span>🤖</span>
+              <span>AI Project Workspace</span>
+            </Link>
+
+            <Link
               href="/"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs font-bold bg-[#ef4444] hover:bg-[#dc2626] active:bg-[#b91c1c] text-white px-4 py-2 rounded transition-all duration-150 shadow-[0_0_12px_rgba(239,68,68,0.35)] hover:shadow-[0_0_16px_rgba(239,68,68,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >

@@ -37,7 +37,7 @@ class SandboxClient:
         trust_arg = repository_trust.value if hasattr(repository_trust, "value") else str(repository_trust)
         self.backend = backend or get_sandbox_backend(policy, repository_trust=trust_arg)
         self.repository_trust = repository_trust
-        
+
     def execute_patch(self, patch: PatchCandidate) -> Dict[str, Any]:
         """Legacy mock for Stage 7 compliance."""
         return {
@@ -94,20 +94,28 @@ class SandboxClient:
             # 2. Copy trusted repo snapshot to workspace (excluding secrets, credentials, VCS, caches)
             shutil.copytree(self.repo_root, workspace, dirs_exist_ok=True, ignore=workspace_copy_ignore)
             assert_and_clean_workspace_secrets(workspace)
-            
+
             # 3. Apply patch
             if patch and patch.diff.strip():
                 patch_file = os.path.join(workspace, "candidate.patch")
                 diff_text = patch.diff if patch.diff.endswith("\n") else patch.diff + "\n"
                 with open(patch_file, "w", newline="\n", encoding="utf-8") as f:
                     f.write(diff_text)
-                
+
                 # Apply using git apply. Ensure workspace is a git repo first to use git tools.
                 try:
                     subprocess.run(["git", "init"], cwd=workspace, check=True, capture_output=True)
                     subprocess.run(["git", "config", "core.autocrlf", "false"], cwd=workspace, check=True, capture_output=True)
                     subprocess.run(["git", "add", "-A"], cwd=workspace, check=True, capture_output=True)
-                    subprocess.run(["git", "apply", "candidate.patch"], cwd=workspace, check=True, capture_output=True)
+                    try:
+                        subprocess.run(["git", "apply", "candidate.patch"], cwd=workspace, check=True, capture_output=True)
+                    except subprocess.CalledProcessError:
+                        r = subprocess.run(["git", "apply", "--recount", "--ignore-whitespace", "candidate.patch"], cwd=workspace, capture_output=True)
+                        if r.returncode != 0:
+                            normalized = self._normalize_patch_diff(diff_text)
+                            with open(patch_file, "w", newline="\n", encoding="utf-8") as f:
+                                f.write(normalized)
+                            subprocess.run(["git", "apply", "--recount", "--ignore-whitespace", "candidate.patch"], cwd=workspace, check=True, capture_output=True)
                 except subprocess.CalledProcessError as e:
                     return ExecutionResult(
                         run_id=run_id,
@@ -127,7 +135,7 @@ class SandboxClient:
                             "capabilities": caps.model_dump()
                         }
                     )
-            
+
             # 4. Execute Trusted Command
             req = ExecutionRequest(
                 command=test_command,
@@ -149,3 +157,82 @@ class SandboxClient:
         finally:
             # 5. Clean up
             _rmtree_readonly(workspace)
+
+    @staticmethod
+    def _normalize_patch_diff(diff: str) -> str:
+        import re
+        if not diff or not diff.strip():
+            return diff
+
+        if "\\n" in diff and "\n" not in diff:
+            diff = diff.replace("\\n", "\n")
+
+        lines = diff.splitlines()
+        while lines and lines[-1].strip() == "":
+            lines.pop()
+
+        # Detect common block indentation (e.g. from JSON or markdown fences)
+        block_indent = 0
+        for l in lines:
+            if l.strip().startswith("--- "):
+                block_indent = len(l) - len(l.lstrip())
+                break
+        if block_indent > 0:
+            lines = [l[block_indent:] if l.startswith(" " * block_indent) else l.lstrip() for l in lines]
+
+        def _format_hunk(old_s: int, old_c: int, new_s: int, new_c: int, had_old_comma: bool, had_new_comma: bool) -> str:
+            old_part = f"-{old_s},{old_c}" if (old_c != 1 or had_old_comma) else f"-{old_s}"
+            new_part = f"+{new_s},{new_c}" if (new_c != 1 or had_new_comma) else f"+{new_s}"
+            return f"@@ {old_part} {new_part} @@"
+
+        hunk_lines = []
+        out = []
+        old_start = 1
+        new_start = 1
+        had_old_comma = True
+        had_new_comma = True
+        in_hunk = False
+        for l in lines:
+            if l.startswith("--- ") or l.startswith("+++ "):
+                out.append(l)
+            elif l.strip().startswith("@@"):
+                if hunk_lines:
+                    old_cnt = sum(1 for hl in hunk_lines if hl.startswith("-") or not hl.startswith("+"))
+                    new_cnt = sum(1 for hl in hunk_lines if hl.startswith("+") or not hl.startswith("-"))
+                    out.append(_format_hunk(old_start, old_cnt, new_start, new_cnt, had_old_comma, had_new_comma))
+                    out.extend(hunk_lines)
+                    hunk_lines = []
+                m = re.match(r"^\s*@@\s+-(\d+)(?:,(\d+))?\s+\+(\d+)(?:,(\d+))?\s+@@", l)
+                if m:
+                    old_start = int(m.group(1))
+                    had_old_comma = m.group(2) is not None
+                    new_start = int(m.group(3))
+                    had_new_comma = m.group(4) is not None
+                    in_hunk = True
+                else:
+                    in_hunk = False
+                    out.append(l)
+            elif in_hunk:
+                m = re.match(r"^(\s*)([+-])(\s*)(.*)$", l)
+                if m:
+                    lead = len(m.group(1))
+                    marker = m.group(2)
+                    mid = len(m.group(3))
+                    rest = m.group(4)
+                    if lead == 0:
+                        code_indent = mid
+                    else:
+                        code_indent = max(0, lead + mid - 2)
+                    hunk_lines.append(f"{marker}{' ' * code_indent}{rest}")
+                else:
+                    hunk_lines.append(l)
+            else:
+                out.append(l)
+
+        if hunk_lines:
+            old_cnt = sum(1 for hl in hunk_lines if hl.startswith("-") or not hl.startswith("+"))
+            new_cnt = sum(1 for hl in hunk_lines if hl.startswith("+") or not hl.startswith("-"))
+            out.append(_format_hunk(old_start, old_cnt, new_start, new_cnt, had_old_comma, had_new_comma))
+            out.extend(hunk_lines)
+
+        return "\n".join(out) + "\n"

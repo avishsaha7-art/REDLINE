@@ -26,8 +26,16 @@ data/*.db
 data/*.db-shm
 data/*.db-wal
 data/*.sqlite*
+backend/storage/*.db
+backend/storage/*.db-shm
+backend/storage/*.db-wal
+backend/storage/*.sqlite*
 data/artifacts/*
 !data/artifacts/.gitkeep
+data/quarantine/*
+!data/quarantine/.gitkeep
+data/projects/*
+!data/projects/.gitkeep
 
 # Node.js and Next.js dependencies & build outputs
 node_modules/
